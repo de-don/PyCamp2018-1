@@ -34,7 +34,7 @@ class KeyCounterTest(TestCase):
 
         self.assertEqual(keys_counter(given), expect)
 
-    def test_similar_dicts(self):
+    def test_same_dicts(self):
         given = [{'id': 1, 'success': True, 'name': 'Lary'},
                  {'id': 2, 'success': True, 'name': 'Lary'},]
         expect = [{'key': 'id', 'value': 1, 'count': 1},
