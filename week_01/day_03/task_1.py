@@ -2,7 +2,7 @@ from collections import Counter
 
 
 def keys_counter(list_of_dicts):
-    """ Function counts unique combinations of key: value pairs in list of dictionaries.
+    """ Function counts unique key: value pairs in list of dictionaries.
     Args:
         list_of_dicts (list): list of Python dict() objects
             Example:
@@ -12,7 +12,8 @@ def keys_counter(list_of_dicts):
 
     Returns:
         sum_keys_vals (list): list of Python dict() objects
-            Every dictionary contains unique pair key: value and results of count in list_of_dicts.
+            Every dictionary contains unique pair key: value
+            and results of count in list_of_dicts.
             Example:
             [{'key': key1, value: val1, count: 1},
             {'key': key1, value: val4, count: 1},
@@ -26,7 +27,8 @@ def keys_counter(list_of_dicts):
     for d in list_of_dicts:
         count.update(d.items())
 
-    sum_keys_vals = [{'key': item[0], "value": item[1], "count": c} for item, c in count.items()]
+    sum_keys_vals = [{'key': item[0], "value": item[1], "count": c}
+                     for item, c in count.items()]
     return sum_keys_vals
 
 
