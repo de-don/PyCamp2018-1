@@ -20,22 +20,13 @@ def keys_counter(list_of_dicts):
             {'key': key3, value: val3, count: 1},
             {'key': key3, value: val5, count: 1},
             ]
+
     """
-    keys_and_vals = list()
+    count = Counter()
     for d in list_of_dicts:
-        # list of unique pairs key, value
-        keys_and_vals += [(('key', k), ('value', v)) for k, v in d.items()]
+        count.update(d.items())
 
-    sum_keys_vals = list()
-    # count unique (('key', k), ('value', v)) tuples
-    count = Counter(keys_and_vals)
-    for c in count.items():
-        # c is a tuple, containing further information:
-        # ((('key', k), ('value', v)), count)
-        d = dict(c[0])
-        d['count'] = c[1]
-        sum_keys_vals.append(d)
-
+    sum_keys_vals = [{'key': item[0], "value": item[1], "count": c} for item, c in count.items()]
     return sum_keys_vals
 
 
