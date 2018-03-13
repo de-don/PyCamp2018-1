@@ -1,4 +1,4 @@
-import warnings
+import logging
 
 
 def dict_merger(dict1, dict2):
@@ -11,10 +11,13 @@ def dict_merger(dict1, dict2):
         dict(): merged dictionary
 
     """
+    logging.basicConfig(filename='task_2.log', level=logging.WARNING,
+                        format='%(asctime)s | %(levelname)s: %(message)s')
+
     for k in dict1.keys():
         if k in dict2.keys():  # and dict1[k] == dict2[k]:
-            print('WARNING! Both dictionaries has key', k)
-            print('{}: {} from dict1 will be replaced by {}: {} from dict2'.format(k, dict1[k], k, dict2[k]))
+            logging.warning('\'{}: {}\' from dict1 will be replaced by '
+                            '\'{}: {}\' from dict2'.format(k, dict1[k], k, dict2[k]))
     return {**dict1, **dict2}
 
 
