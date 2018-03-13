@@ -1,5 +1,4 @@
-# transliteration dictionaries for transformation from russian into english
-one_letter = {
+RU_TO_ENG_DICT = {
     "а": "a",
     "б": "b",
     "в": "v",
@@ -23,8 +22,6 @@ one_letter = {
     "ъ": "\"",
     "ы": "y",
     "ь": "\'",
-}
-two_letter = {
     "ё": "jo",
     "ж": "zh",
     "й": "jj",
@@ -34,10 +31,9 @@ two_letter = {
     "э": "eh",
     "ю": "ju",
     "я": "ja",
-}
-three_letter = {
     "щ": "shh",
 }
+ENG_TO_RU_DICT = {v: k for k, v in RU_TO_ENG_DICT.items()}
 
 
 def dict_replacement(text, *args):
@@ -53,17 +49,48 @@ def dict_replacement(text, *args):
 
     Returns:
         new_text (str): text after the replacement rules applied
+
     """
-    list_of_dicts = args
-    new_text = text
-    for d in list_of_dicts:
-        for k, v in d.items():
-            new_text = new_text.replace(k.lower(), v.lower())
-            new_text = new_text.replace(k.upper(), v.upper())
+    new_text = ""
+    for d in args:
+        current_symbol_pos = 0
+        while current_symbol_pos < len(text):
+            # search group of symbols or symbol in transliterate dictionary
+            is_translitable_old_letter = False
+            # first check group of three symbols
+            if text[current_symbol_pos: current_symbol_pos + 3].lower() in d.keys():
+                old_letter = text[current_symbol_pos: current_symbol_pos + 3]
+                is_translitable_old_letter = True
+            # then check group of two symbols
+            elif text[current_symbol_pos: current_symbol_pos + 2].lower() in d.keys():
+                old_letter = text[current_symbol_pos: current_symbol_pos + 2]
+                is_translitable_old_letter = True
+            # finally check single symbols
+            elif text[current_symbol_pos].lower() in d.keys():
+                old_letter = text[current_symbol_pos]
+                is_translitable_old_letter = True
+            # if symbols are not in transliteration dictionary
+            else:
+                old_letter = text[current_symbol_pos]
+
+            # produce new text
+            # translited symbol added to new text
+            if is_translitable_old_letter:
+                # process uppercase translitable symbols
+                if old_letter[0].isupper():
+                    new_text += d[old_letter.lower()].upper()
+                else:
+                    new_text += d[old_letter.lower()]
+            # non-translitable symbol added to new text
+            else:
+                new_text += old_letter
+
+            current_symbol_pos += len(old_letter)
+
     return new_text
 
 
-def transliterate(text, source_lang="ru"):
+def transliterate(text, source_lang='ru'):
     """Transliteration function based on GOST http://transliteration.ru/gost/
 
     Supports transliteration from Russian and vice versa
@@ -78,22 +105,21 @@ def transliterate(text, source_lang="ru"):
         eng_to_rus (str): russian text gathered from translit
             OR
         rus_to_eng (str): translitted text
+
+    Raises:
+        ValueError: If 'source_lang' argument incorrect
+            (see 'source_lang' description)
+
     """
-    if source_lang.lower() in ("eng", "en", "e", "english"):
-        # switch keys and values in replacement dictionaries
-        # because source dictionaries are for translit from russian into english
-        three_letter_r = {v: k for k, v in three_letter.items()}
-        two_letter_r = {v: k for k, v in two_letter.items()}
-        one_letter_r = {v: k for k, v in one_letter.items()}
+    if source_lang.lower() in ('eng', 'en', 'e', 'english'):
         # apply replacement rules from dictionaries
-        eng_to_rus = dict_replacement(text, three_letter_r, two_letter_r, one_letter_r)
+        eng_to_rus = dict_replacement(text, ENG_TO_RU_DICT)
         return eng_to_rus
-    elif source_lang.lower() in ("ru", "rus", "r", "russain"):
+    elif source_lang.lower() in ('ru', 'rus', 'r', 'russain'):
         # apply replacement rules from dictionaries
-        rus_to_eng = dict_replacement(text, three_letter, two_letter, one_letter)
+        rus_to_eng = dict_replacement(text, RU_TO_ENG_DICT)
         return rus_to_eng
     else:
         raise ValueError("Wrong language selected")
-
 
 
