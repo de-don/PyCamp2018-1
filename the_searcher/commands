@@ -1,0 +1,14 @@
+python3 the_searcher.py --help "\w+\s\w"  the_searcher.py
+python3 the_searcher.py --stat freq "\w+\s\w"  the_searcher.py
+python3 the_searcher.py --stat count "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -n 11 "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -n 5 "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -s freq -o desc "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -s freq "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -s abc -o desc "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -s abc "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -l "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -uc "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -c "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -u "\w+\s\w"  the_searcher.py
+python3 the_searcher.py "\w+\s\w"  the_searcher.py
