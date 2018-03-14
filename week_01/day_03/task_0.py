@@ -51,43 +51,38 @@ def dict_replacement(text, *args):
         new_text (str): text after the replacement rules applied
 
     """
-    new_text = ""
+    new_text = []
     for d in args:
-        current_symbol_pos = 0
-        while current_symbol_pos < len(text):
-            # search group of symbols or symbol in transliterate dictionary
-            is_translitable_old_letter = False
-            # first check group of three symbols
-            if text[current_symbol_pos: current_symbol_pos + 3].lower() in d.keys():
-                old_letter = text[current_symbol_pos: current_symbol_pos + 3]
-                is_translitable_old_letter = True
-            # then check group of two symbols
-            elif text[current_symbol_pos: current_symbol_pos + 2].lower() in d.keys():
-                old_letter = text[current_symbol_pos: current_symbol_pos + 2]
-                is_translitable_old_letter = True
-            # finally check single symbols
-            elif text[current_symbol_pos].lower() in d.keys():
-                old_letter = text[current_symbol_pos]
-                is_translitable_old_letter = True
-            # if symbols are not in transliteration dictionary
+        # find length of the longest key in dict
+        longest_substring = max(map(len, d.keys()))
+
+        current_pos = 0
+        while current_pos < len(text):
+
+            # process symbols
+            for substring_len in range(longest_substring, 0, -1):
+
+                old_letter = text[current_pos: current_pos + substring_len]
+
+                if old_letter.lower() in d.keys():
+
+                    # process uppercase symbols
+                    if old_letter[0].isupper():
+                        new_letter = d[old_letter.lower()].upper()
+                    else:
+                        new_letter = d[old_letter.lower()]
+
+                    # skip other symbols of combination
+                    current_pos += substring_len
+                    break
+
             else:
-                old_letter = text[current_symbol_pos]
+                new_letter = text[current_pos]
+                current_pos += 1
 
-            # produce new text
-            # translited symbol added to new text
-            if is_translitable_old_letter:
-                # process uppercase translitable symbols
-                if old_letter[0].isupper():
-                    new_text += d[old_letter.lower()].upper()
-                else:
-                    new_text += d[old_letter.lower()]
-            # non-translitable symbol added to new text
-            else:
-                new_text += old_letter
+            new_text.append(new_letter)
 
-            current_symbol_pos += len(old_letter)
-
-    return new_text
+    return ''.join(new_text)
 
 
 def transliterate(text, source_lang='ru'):
