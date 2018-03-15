@@ -8,7 +8,7 @@ python3 the_searcher.py -s freq "\w+\s\w"  the_searcher.py
 python3 the_searcher.py -s abc -o desc "\w+\s\w"  the_searcher.py
 python3 the_searcher.py -s abc "\w+\s\w"  the_searcher.py
 python3 the_searcher.py -l "\w+\s\w"  the_searcher.py
-python3 the_searcher.py -uc "\w+\s\w"  the_searcher.py
+python3 the_searcher.py -u -c "\w+\s\w"  the_searcher.py
 python3 the_searcher.py -c "\w+\s\w"  the_searcher.py
 python3 the_searcher.py -u "\w+\s\w"  the_searcher.py
 python3 the_searcher.py "\w+\s\w"  the_searcher.py
