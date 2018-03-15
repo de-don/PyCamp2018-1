@@ -23,9 +23,8 @@ def lines_generator(filename):
     if filename:
         text_stream = click.open_file(filename, 'r')
 
-    with text_stream as lines:
-        for line in lines:
-            yield line
+    for line in text_stream:
+        yield line
 
 
 @click.command()
@@ -42,7 +41,9 @@ def lines_generator(filename):
 def searcher(pattern, filename, flag_u, flag_c, flag_uc, flag_l, flag_s, flag_o, flag_n, stat):
     """
     """
-    text_lines = lines_generator(filename)
+    text_lines = click.get_text_stream('stdin')
+    if filename:
+        text_lines = click.open_file(filename, 'r')
 
     count = Counter()
     pattern_matches = 0
@@ -86,7 +87,7 @@ def searcher(pattern, filename, flag_u, flag_c, flag_uc, flag_l, flag_s, flag_o,
         for line in text_lines:
             count.update(re.findall(pattern, line))
 
-        sorted_count = sorted(count.items(), key=itemgetter(flag_s=='freq'), reverse=(flag_o=='desc'))
+        sorted_count = sorted(count.items(), key=itemgetter(flag_s == 'freq'), reverse=(flag_o == 'desc'))
 
         for s in sorted_count:
             print('{}: {}'.format(s[0], s[1]))
