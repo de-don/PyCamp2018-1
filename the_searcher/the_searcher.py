@@ -49,6 +49,15 @@ def searcher(pattern, filename, flag_u, flag_c, flag_uc, flag_l, flag_s, flag_o,
     pattern_matches = 0
     lines_matches = 0
 
+    if flag_c:
+        click.echo("Total count of matches")
+
+        for line in text_lines:
+            pattern_matches += len(re.findall(pattern, line))
+        print(pattern_matches)
+
+
+
     if flag_u:
         click.echo("List of unique matches")
 
@@ -58,12 +67,7 @@ def searcher(pattern, filename, flag_u, flag_c, flag_uc, flag_l, flag_s, flag_o,
         for k in count.keys():
             print(k)
 
-    elif flag_c:
-        click.echo("Total count of matches")
 
-        for line in text_lines:
-            pattern_matches += len(re.findall(pattern, line))
-        print(pattern_matches)
 
     elif flag_uc:
         click.echo("Total count of unique matches")
