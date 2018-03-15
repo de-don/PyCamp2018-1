@@ -3,6 +3,7 @@ import reprlib
 import numbers
 
 
+
 def normalize(elements):
     """Make each list in elements of equal length
 
@@ -12,6 +13,16 @@ def normalize(elements):
         elem.extend([0] * (maxlen - len(elem)))
 
     return elements
+
+
+def flatten(elements):
+    """Flattens list of lists into 1-d list"""
+    flattened = list()
+
+    for el in elements:
+        flattened.extend(el)
+
+    return flattened
 
 
 class Matrix:
@@ -54,26 +65,56 @@ class Matrix:
         return matrix_format.format(*matrix_rows)
 
     def __len__(self):
-        return len(self._elements)
+        return self.rows * self.columns
 
     def __add__(self, other):
-        pass
+        # Matrix + Numeric
+        if isinstance(other, numbers.Rational):
+            result = [[i + other for i in el] for el in self._elements]
+            return Matrix(result)
+        # Matrix + Matrix
+        elif isinstance(other, type(self)):
+            if self.columns == other.columns and self.rows == other.rows:
+                pairs = list(zip(flatten(self._elements), flatten(other._elements)))
+
+                result = [[a + b for a, b in pairs[i:i+self.rows]]
+                          for i in range(0, len(self), self.rows)]
+
+                return Matrix(result)
+
+            else:
+                raise TypeError
+
+        else:
+            raise TypeError
 
     def __radd__(self, other):
-        pass
-
-    def __iadd__(self, other):
-        pass
+        self + other
 
 
     def __mul__(self, other):
-        pass
+        # Matrix * Numeric
+        if isinstance(other, numbers.Rational):
+            result = [[i * other for i in el] for el in self._elements]
+            return Matrix(result)
+        # Matrix * Matrix
+        # elif isinstance(other, type(self)):
+            # if self.columns == other.columns and self.rows == other.rows:
+
+            # else:
+                # raise TypeError
+
+        else:
+            raise TypeError
 
     def __rmul__(self, other):
-        pass
+        self * other
 
-    def __imul__(self, other):
-        pass
+    def __sub__(self, other):
+        return self + (-1) * other
+
+    def __rsub__(self, other):
+        return self - other
 
 
     def __matmul__(self, other):
@@ -94,7 +135,7 @@ class Matrix:
         pass
 
     def __eq__(self, other):
-        pass
+        return self._elements == other._elements
 
 
     def is_square_matrix(self):
@@ -103,12 +144,8 @@ class Matrix:
     def transpose(self):
         cls = type(self)
 
-        for_transpose = array('f')
-        for r in self._elements:
-            for_transpose.extend(r)
-
-        transposed = [for_transpose[i::self.rows] for i in range(self.columns)]
-        # print(transposed)
+        transposed = [flatten(self._elements)[i::self.rows]
+                      for i in range(self.columns)]
 
         return cls(transposed)
 
@@ -126,13 +163,17 @@ class Matrix:
 if __name__ == '__main__':
     m = Matrix([[1,2], [4,5, 5], [8]])
     print(m)
-    print(m.is_square_matrix())
-    m2 = Matrix.zero(3, 10)
-    print(m2)
-    print(m2.is_square_matrix())
-    m3 = Matrix.even(10)
-    print(m3)
-    print(m3.is_square_matrix())
-    print(m[0])
+    # print(m.is_square_matrix())
+    # m2 = Matrix.zero(3, 10)
+    # print(m2)
+    # print(m2.is_square_matrix())
+    # m3 = Matrix.even(10)
+    # print(m3)
+    # print(m3.is_square_matrix())
+    # print(m[0])
     print(m.transpose())
+    print(m + m.transpose())
+    print(m - 1)
+    m += 1
+    print(m)
 
