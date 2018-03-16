@@ -25,6 +25,8 @@ class MatrixTester(TestCase):
             Matrix([[2, 3], [1, 4]]),  # 12
             Matrix([[1, 2], [4, 5]]),  # 13
             Matrix([[14, 19], [17, 22]]),  # 14
+            Matrix([[1, 1], [1, 1]]),  # 15
+            Matrix([[2, 2], [2, 2]]),  # 16
 
         ]
 
@@ -90,8 +92,18 @@ class MatrixTester(TestCase):
         self.assertEqual(self.matrices[10], self.matrices[10].transpose().transpose())
 
     def test_matrix_power(self):
-        self.assertEqual(self.matrices[0] ** 4, self.matrices[0])
-        self.assertEqual((self.matrices[0] * 2) ** 2, self.matrices[1] * 2)
+        self.assertEqual(
+            Matrix([[1, 0], [0, 1]]) ** 400,
+            Matrix([[1, 0], [0, 1]])
+        )
+        self.assertEqual(
+            Matrix([[2, 1], [1, 3]]) ** 2,
+            Matrix([[2, 1], [1, 3]]) @ Matrix([[2, 1], [1, 3]])
+        )
+        self.assertNotEqual(
+            Matrix([[1, 1], [1, 1]]) ** 3,
+            Matrix([[1, 1], [1, 1]])
+        )
 
     def test_matrix_mul_matrix(self):
         self.assertEqual(self.matrices[12] @ self.matrices[13], self.matrices[14])

@@ -147,9 +147,20 @@ class Matrix:
 
     def __pow__(self, power, modulo=None):
         # Matrix ** Numeric
-        if isinstance(power, numbers.Rational):
-            result = [[i ** power for i in el] for el in self._elements]
-            return Matrix(result)
+        # works only for square matrices
+        if isinstance(power, numbers.Integral) and (self.rows == self.columns):
+            # Returns even matrix if power is 0
+            if power == 0:
+                return Matrix().even(self.rows)
+            elif power == 1:
+                return self
+            elif power > 1:
+                base_val = self
+                for i in range(power - 1):
+                    base_val @= self
+                return base_val
+            else:
+                raise TypeError
         else:
             raise TypeError
 
@@ -202,5 +213,6 @@ if __name__ == '__main__':
     # print(m)
     # print(id(m))
     print(m2)
-    print(m2 * m)
+    print(m2 @ m)
+    print(Matrix([[1, 1], [1, 1]]) ** 2)
 
