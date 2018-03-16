@@ -17,6 +17,14 @@ class MatrixTester(TestCase):
             Matrix([[2, 2], [2]]),  # 4
             Matrix([[0, 0], [0, 0]]),  # 5
             Matrix([[0, 0, 0], [0, 0, 0]]),  # 6
+            Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),  # 7
+            Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]]),  # 8
+            Matrix([[1, 4, 7], [2, 5, 8], [3, 6, 9]]),  # 9
+            Matrix([[1, 2], [4, 5], [7, 8]]),  # 10
+            Matrix([[1, 4, 7], [2, 5, 8]]),  # 11
+            Matrix([[2, 3], [1, 4]]),  # 12
+            Matrix([[1, 2], [4, 5]]),  # 13
+            Matrix([[14, 19], [17, 22]]),  # 14
 
         ]
 
@@ -70,6 +78,51 @@ class MatrixTester(TestCase):
         self.assertEqual(Matrix.zero(2, 2), self.matrices[5])
         self.assertEqual(Matrix.zero(2, 3), self.matrices[6])
         self.assertNotEqual(Matrix.zero(3, 3), self.matrices[6])
+
+    def test_creating_even_matrix(self):
+        self.assertEqual(self.matrices[7], Matrix.even(3))
+        self.assertTrue(Matrix.even(3).is_square_matrix())
+
+    def test_matrix_transpose(self):
+        self.assertEqual(self.matrices[0], self.matrices[0].transpose())
+        self.assertEqual(self.matrices[9], self.matrices[8].transpose())
+        self.assertEqual(self.matrices[10], self.matrices[11].transpose())
+        self.assertEqual(self.matrices[10], self.matrices[10].transpose().transpose())
+
+    def test_matrix_power(self):
+        self.assertEqual(self.matrices[0] ** 4, self.matrices[0])
+        self.assertEqual((self.matrices[0] * 2) ** 2, self.matrices[1] * 2)
+
+    def test_matrix_mul_matrix(self):
+        self.assertEqual(self.matrices[12] @ self.matrices[13], self.matrices[14])
+        self.assertNotEqual(
+            self.matrices[12] @ self.matrices[13],
+            self.matrices[13] @ self.matrices[12]
+        )
+        with self.assertRaises(TypeError):
+            self.matrices[12] @ 1
+
+    def test_i_operations_not_change_id(self):
+        check = Matrix([[1, 1], [1, 1]])
+        id0 = id(check)
+        check += 1
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
+        check -= 4
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
+        check += Matrix([[1, 1], [1, 1]])
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
+        check *= 3
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
+        check **= 3
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
+        check @= Matrix([[3, 3], [3, 3]])
+        id_check = id(check)
+        self.assertEqual(id0, id_check)
 
 
 
