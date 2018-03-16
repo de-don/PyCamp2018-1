@@ -10,13 +10,13 @@ class MatrixTester(TestCase):
         self.not_normal = [[1], [1, 2], [1, 2, 3]]
         self.not_normal_matrix = Matrix([[1], [1, 2], [1, 2, 3]])
         self.matrices = [
-            Matrix([[1, 1], [1, 1]]),
-            Matrix([[2, 2], [2, 2]]),
-            Matrix([[1, 1], [1]]),
-            Matrix([[2, 2], [2, 1]]),
-            Matrix([[2, 2], [2]]),
-            Matrix([[0, 0], [0, 0]]),
-            Matrix([[0, 0, 0], [0, 0, 0]]),
+            Matrix([[1, 1], [1, 1]]),  # 0
+            Matrix([[2, 2], [2, 2]]),  # 1
+            Matrix([[1, 1], [1]]),  # 2
+            Matrix([[2, 2], [2, 1]]),  # 3
+            Matrix([[2, 2], [2]]),  # 4
+            Matrix([[0, 0], [0, 0]]),  # 5
+            Matrix([[0, 0, 0], [0, 0, 0]]),  # 6
 
         ]
 
@@ -65,6 +65,11 @@ class MatrixTester(TestCase):
         self.assertEqual(2 * self.matrices[0], self.matrices[0] * 2)
         with self.assertRaises(TypeError):
             self.matrices[0] * [[1, 1], [1, 1]]
+
+    def test_creating_zero_matrix(self):
+        self.assertEqual(Matrix.zero(2, 2), self.matrices[5])
+        self.assertEqual(Matrix.zero(2, 3), self.matrices[6])
+        self.assertNotEqual(Matrix.zero(3, 3), self.matrices[6])
 
 
 
