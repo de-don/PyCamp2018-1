@@ -33,8 +33,25 @@ class Matrix:
 
     """
     def __init__(self, elements):
-        self._elements = [array('f', row)
-                          for row in normalize(elements)]
+        # Matrix can be created only for iterable of numbers
+        # and iterable of iterable of numbers
+        # E.g. list of floats or list of array of ints
+        if isinstance(elements, Iterable):
+            iterator = iter(elements)
+            # check if elements are numbers
+            if all(isinstance(rest, numbers.Real)
+                   for rest in iterator):
+                self._elements = [array('f', elements)]
+            # che if all elements are iterable
+            elif all(isinstance(rest, Iterable)
+                     for rest in iterator):
+                self._elements = [array('f', row)
+                                  for row in normalize(elements)]
+            else:
+                raise TypeError('All elements of data must be numbers or iterables')
+        else:
+            raise TypeError('Data must be iterable')
+
         self._rows = len(self._elements)
         self._columns = len(self._elements[0])
 
@@ -64,12 +81,38 @@ class Matrix:
 
     def __getitem__(self, index):
         cls = type(self)
+        if isinstance(index, tuple):
+            if len(index) == 1:
+                if isinstance(index[0], slice) or isinstance(index[0], numbers.Integral):
+                    return self._elements[index[0]]
+                else:
+                    raise TypeError("Index 0 must be integer of slice")
+            elif len(index) == 2:
+                if isinstance(index[0], numbers.Integral) and isinstance(index[1], numbers.Integral):
+                    return self._elements[index[0]][index[1]]
+
+                elif isinstance(index[0], slice) and isinstance(index[1], numbers.Integral):
+                    return Matrix([[t[index[1]]] for t in self._elements[index[0]]])
+
+                elif isinstance(index[0], numbers.Integral) and isinstance(index[1], slice):
+                    return Matrix([t for t in self._elements[index[0]][index[1]]])
+
+                elif isinstance(index[0], slice) and isinstance(index[1], slice):
+                    temp = [[i for i in t[index[1]]] for t in self._elements[index[0]]]
+                    return Matrix(temp)
+
+                else:
+                    raise TypeError(f'Indices have wrong type. Must be int or slice\n'
+                                    f'type({index[0]}) == {type(index[0])}\n'
+                                    f'type({index[1]}) == {type(index[1])}')
+            else:
+                raise TypeError(f'{index} format unacceptable')
         # slicing returns new matrix
         if isinstance(index, slice):
             return cls(self._elements[index])
         # integer index returns row of matrix as an array
         elif isinstance(index, numbers.Integral):
-            return self._elements[index]
+            return cls(self._elements[index])
         else:
             msg = '{.__name__} indices must be integers'
             raise TypeError(msg.format(cls))
@@ -93,7 +136,7 @@ class Matrix:
 
     def __add__(self, other):
         # Matrix + Numeric
-        if isinstance(other, numbers.Rational):
+        if isinstance(other, numbers.Real):
             result = [[i + other for i in el] for el in self._elements]
             return Matrix(result)
         # Matrix + Matrix
@@ -182,8 +225,8 @@ class Matrix:
         self._elements = (self ** other)._elements
         return self
 
-    def __invert__(self):
-        pass
+    # def __invert__(self):
+        # pass
 
     def is_square_matrix(self):
         return self.rows == self.columns
@@ -205,30 +248,7 @@ class Matrix:
         s = [[1 if i == j else 0 for i in range(rows)] for j in range(rows)]
         return cls(s)
 
+
 if __name__ == '__main__':
-    m = Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    m2 = Matrix([[2, 3], [1, 4]])
-    # print(m)
-    # print(m.is_square_matrix())
-    # m2 = Matrix.zero(3, 10)
-    # print(m2)
-    # print(m2.is_square_matrix())
-    # m3 = Matrix.even(10)
-    # print(m3)
-    # print(m3.is_square_matrix())
-    # print(m[0])
-    # print(m.transpose())
-    # print(m + m.transpose())
-    # print(1 + m)
-    # m += 1
-    # print(m)
-    # print(id(m))
-    # m += 1
-    # print(m)
-    # print(id(m))
-    # print(m2)
-    # print(m2 @ m)
-    # print(Matrix([[1, 1], [1, 1]]) ** 2)
-    print(type(m[0:2][0:2]))
-    print(m[0])
+    print('ok')
 

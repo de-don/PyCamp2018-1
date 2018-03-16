@@ -31,16 +31,12 @@ class MatrixTester(TestCase):
         ]
 
     def test_get_elements_of_matrix(self):
-        test_matrix = self.matrices[7]
+        test_matrix = self.matrices[8]
         self.assertTrue(isinstance(test_matrix, Matrix))
-        self.assertTrue(isinstance(test_matrix[::2], Matrix))
-        self.assertFalse(isinstance(test_matrix[0], Matrix))
-        self.assertTrue(isinstance(test_matrix[0][0], float))
-        self.assertNotEqual(
-            len(self.not_normal_matrix), len(flatten(self.not_normal))
-        )
-        with self.assertRaises(TypeError):
-            test_matrix[4.4]
+        self.assertTrue(isinstance(test_matrix[1, 1], float))
+        self.assertTrue(isinstance(test_matrix[0:2, 0], Matrix))
+        self.assertTrue(isinstance(test_matrix[0, 0:2], Matrix))
+        self.assertTrue(isinstance(test_matrix[0:2, 0:2], Matrix))
 
     def test_set_elements_of_matrix(self):
         test_matrix = self.matrices[7]
