@@ -1,7 +1,7 @@
 from array import array
-import reprlib
 import numbers
 from functools import reduce
+from collections import Iterable
 
 
 
@@ -64,13 +64,26 @@ class Matrix:
 
     def __getitem__(self, index):
         cls = type(self)
+        # slicing returns new matrix
         if isinstance(index, slice):
             return cls(self._elements[index])
+        # integer index returns row of matrix as an array
         elif isinstance(index, numbers.Integral):
             return self._elements[index]
         else:
             msg = '{.__name__} indices must be integers'
             raise TypeError(msg.format(cls))
+
+    def __setitem__(self, key, value):
+        # to set any line with new value check if value is iterable
+        if isinstance(value, Iterable):
+            # length of value must be the same with row size
+            if len(value) == self.columns:
+                self._elements[key] = array('f', value)
+            else:
+                raise IndexError
+        else:
+            raise TypeError
 
     def __eq__(self, other):
         if isinstance(other, Matrix):
@@ -85,13 +98,14 @@ class Matrix:
             return Matrix(result)
         # Matrix + Matrix
         elif isinstance(other, type(self)):
+            # matrices must be of same size
             if self.columns == other.columns and self.rows == other.rows:
                 pairs = list(zip(flatten(self._elements), flatten(other._elements)))
                 result = [[a + b for a, b in pairs[i:i+self.rows]]
                           for i in range(0, len(self), self.rows)]
                 return Matrix(result)
             else:
-                raise TypeError
+                raise IndexError
         else:
             raise TypeError
 
@@ -138,8 +152,8 @@ class Matrix:
     def __sub__(self, other):
         return self + (-1) * other
 
-    def __rsub__(self, other):
-        return self - other
+    # def __rsub__(self, other):
+    #     return self - other
 
     def __isub__(self, other):
         self._elements = (self - other)._elements
@@ -151,7 +165,7 @@ class Matrix:
         if isinstance(power, numbers.Integral) and (self.rows == self.columns):
             # Returns even matrix if power is 0
             if power == 0:
-                return Matrix().even(self.rows)
+                return Matrix.even(self.rows)
             elif power == 1:
                 return self
             elif power > 1:
@@ -192,8 +206,8 @@ class Matrix:
         return cls(s)
 
 if __name__ == '__main__':
-    m = Matrix([[1,2], [4,5]])
-    m2 = Matrix([[2,3], [1,4]])
+    m = Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    m2 = Matrix([[2, 3], [1, 4]])
     # print(m)
     # print(m.is_square_matrix())
     # m2 = Matrix.zero(3, 10)
@@ -207,12 +221,14 @@ if __name__ == '__main__':
     # print(m + m.transpose())
     # print(1 + m)
     # m += 1
-    print(m)
+    # print(m)
     # print(id(m))
     # m += 1
     # print(m)
     # print(id(m))
-    print(m2)
-    print(m2 @ m)
-    print(Matrix([[1, 1], [1, 1]]) ** 2)
+    # print(m2)
+    # print(m2 @ m)
+    # print(Matrix([[1, 1], [1, 1]]) ** 2)
+    print(type(m[0:2][0:2]))
+    print(m[0])
 

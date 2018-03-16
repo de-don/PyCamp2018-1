@@ -1,5 +1,5 @@
 from unittest import TestCase
-from .matrixlib import Matrix
+from .matrixlib import Matrix, flatten
 from array import array
 
 
@@ -30,22 +30,30 @@ class MatrixTester(TestCase):
 
         ]
 
-    def test_elements_of_matrix(self):
-        for i in range(len(self.normal_data)):
-            self.assertEqual(
-                self.normal_matrix[i],
-                array('f', self.normal_data[i])
-            )
-        # check normalizing
-        for i in range(len(self.not_normal) - 1):
-            self.assertNotEqual(
-                self.not_normal_matrix[i],
-                array('f', self.not_normal[i])
-            )
-        # check type of each element is float
-        for row in self.normal_matrix:
-            for col in row:
-                self.assertEqual(type(col), float)
+    def test_get_elements_of_matrix(self):
+        test_matrix = self.matrices[7]
+        self.assertTrue(isinstance(test_matrix, Matrix))
+        self.assertTrue(isinstance(test_matrix[::2], Matrix))
+        self.assertFalse(isinstance(test_matrix[0], Matrix))
+        self.assertTrue(isinstance(test_matrix[0][0], float))
+        self.assertNotEqual(
+            len(self.not_normal_matrix), len(flatten(self.not_normal))
+        )
+        with self.assertRaises(TypeError):
+            test_matrix[4.4]
+
+    def test_set_elements_of_matrix(self):
+        test_matrix = self.matrices[7]
+        with self.assertRaises(TypeError):
+            test_matrix[0] = 123
+        with self.assertRaises(IndexError):
+            test_matrix[0] = [1, 2, 3, 4]
+        with self.assertRaises(IndexError):
+            test_matrix[0] = [1]
+        test_matrix[0] = [0, 0, 0]
+        test_matrix[1] = [0, 0, 0]
+        test_matrix[2] = [0, 0, 0]
+        self.assertEqual(test_matrix, Matrix.zero(3, 3))
 
     def test_matrices_equality(self):
         self.assertEqual(self.matrices[0], Matrix([[1, 1], [1, 1]]))
@@ -69,6 +77,8 @@ class MatrixTester(TestCase):
             self.matrices[2] + self.matrices[0],
             self.matrices[0] + self.matrices[2]
         )
+        with self.assertRaises(IndexError):
+            self.matrices[5] + self.matrices[6]
 
     def test_matrix_mul_number(self):
         self.assertEqual(self.matrices[0] * 2, self.matrices[1])
@@ -104,6 +114,18 @@ class MatrixTester(TestCase):
             Matrix([[1, 1], [1, 1]]) ** 3,
             Matrix([[1, 1], [1, 1]])
         )
+        self.assertEqual(
+            self.matrices[9] ** 0,
+            Matrix.even(self.matrices[9].rows)
+        )
+        self.assertEqual(
+            self.matrices[9] ** 1,
+            self.matrices[9]
+        )
+        with self.assertRaises(TypeError):
+            self.matrices[8] ** -2
+        with self.assertRaises(TypeError):
+            self.matrices[8] ** 2.45
 
     def test_matrix_mul_matrix(self):
         self.assertEqual(self.matrices[12] @ self.matrices[13], self.matrices[14])
