@@ -16,7 +16,9 @@ def normalize(elements):
 
 
 def flatten(elements):
-    """Flattens list of lists into 1-d list"""
+    """Flattens list of lists into 1-d list
+
+    """
     flattened = list()
 
     for el in elements:
@@ -26,7 +28,9 @@ def flatten(elements):
 
 
 class Matrix:
-    """"""
+    """
+
+    """
     def __init__(self, elements):
         self._elements = [array('f', row)
                           for row in normalize(elements)]
@@ -89,7 +93,7 @@ class Matrix:
             raise TypeError
 
     def __radd__(self, other):
-        self + other
+        return self + other
 
 
     def __mul__(self, other):
@@ -135,7 +139,10 @@ class Matrix:
         pass
 
     def __eq__(self, other):
-        return self._elements == other._elements
+        if isinstance(other, Matrix):
+            return len(self) == len(other) and self._elements == other._elements
+        else:
+            return NotImplemented
 
 
     def is_square_matrix(self):
@@ -173,7 +180,7 @@ if __name__ == '__main__':
     # print(m[0])
     print(m.transpose())
     print(m + m.transpose())
-    print(m - 1)
+    print(1 + m)
     m += 1
     print(m)
 
