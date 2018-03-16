@@ -15,6 +15,9 @@ class MatrixTester(TestCase):
             Matrix([[1, 1], [1]]),
             Matrix([[2, 2], [2, 1]]),
             Matrix([[2, 2], [2]]),
+            Matrix([[0, 0], [0, 0]]),
+            Matrix([[0, 0, 0], [0, 0, 0]]),
+
         ]
 
     def test_elements_of_matrix(self):
@@ -34,6 +37,12 @@ class MatrixTester(TestCase):
             for col in row:
                 self.assertEqual(type(col), float)
 
+    def test_matrices_equality(self):
+        self.assertEqual(self.matrices[0], Matrix([[1, 1], [1, 1]]))
+        self.assertEqual(Matrix([[1, 1], [1, 1]]), self.matrices[0])
+        self.assertNotEqual(self.matrices[0], self.matrices[1])
+        self.assertNotEqual(self.matrices[0], [[1, 1], [1, 1]])
+
     def test_matrix_plus_number(self):
         self.assertEqual(self.matrices[0] + 1, self.matrices[1])
         self.assertEqual(self.matrices[2] + 1, self.matrices[3])
@@ -52,7 +61,10 @@ class MatrixTester(TestCase):
         )
 
     def test_matrix_mul_number(self):
-        pass
+        self.assertEqual(self.matrices[0] * 2, self.matrices[1])
+        self.assertEqual(2 * self.matrices[0], self.matrices[0] * 2)
+        with self.assertRaises(TypeError):
+            self.matrices[0] * [[1, 1], [1, 1]]
 
 
 
