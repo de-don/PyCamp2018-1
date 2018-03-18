@@ -31,25 +31,32 @@ class MatrixTester(TestCase):
         ]
 
     def test_get_elements_of_matrix(self):
-        test_matrix = self.matrices[8]
-        self.assertTrue(isinstance(test_matrix, Matrix))
+        test_matrix = self.matrices[8]  # 3 x 3 matrix
         self.assertTrue(isinstance(test_matrix[1, 1], float))
         self.assertTrue(isinstance(test_matrix[0:2, 0], Matrix))
         self.assertTrue(isinstance(test_matrix[0, 0:2], Matrix))
         self.assertTrue(isinstance(test_matrix[0:2, 0:2], Matrix))
+        with self.assertRaises(TypeError):
+            test_matrix[0.6, 2]
+        with self.assertRaises(TypeError):
+            test_matrix[0.6, 2, 3]
+
+    def test_creating_zero_matrix(self):
+        self.assertEqual(Matrix.zero(2, 2), self.matrices[5])
+        self.assertEqual(Matrix.zero(2, 3), self.matrices[6])
+        self.assertNotEqual(Matrix.zero(3, 3), self.matrices[6])
 
     def test_set_elements_of_matrix(self):
-        test_matrix = self.matrices[7]
-        with self.assertRaises(TypeError):
+        test_matrix = self.matrices[0]  # [[1, 1], [1, 1]]
+        with self.assertRaises(IndexError):
             test_matrix[0] = 123
         with self.assertRaises(IndexError):
             test_matrix[0] = [1, 2, 3, 4]
-        with self.assertRaises(IndexError):
-            test_matrix[0] = [1]
-        test_matrix[0] = [0, 0, 0]
-        test_matrix[1] = [0, 0, 0]
-        test_matrix[2] = [0, 0, 0]
-        self.assertEqual(test_matrix, Matrix.zero(3, 3))
+        with self.assertRaises(TypeError):
+            test_matrix[0] = [[1, 0], [1, 0]]
+        test_matrix[0] = [0, 0]
+        test_matrix[1] = [0, 0]
+        self.assertEqual(test_matrix, Matrix.zero(2, 2))
 
     def test_matrices_equality(self):
         self.assertEqual(self.matrices[0], Matrix([[1, 1], [1, 1]]))
@@ -81,11 +88,6 @@ class MatrixTester(TestCase):
         self.assertEqual(2 * self.matrices[0], self.matrices[0] * 2)
         with self.assertRaises(TypeError):
             self.matrices[0] * [[1, 1], [1, 1]]
-
-    def test_creating_zero_matrix(self):
-        self.assertEqual(Matrix.zero(2, 2), self.matrices[5])
-        self.assertEqual(Matrix.zero(2, 3), self.matrices[6])
-        self.assertNotEqual(Matrix.zero(3, 3), self.matrices[6])
 
     def test_creating_even_matrix(self):
         self.assertEqual(self.matrices[7], Matrix.even(3))
@@ -153,11 +155,5 @@ class MatrixTester(TestCase):
         check @= Matrix([[3, 3], [3, 3]])
         id_check = id(check)
         self.assertEqual(id0, id_check)
-
-
-
-
-
-
 
 

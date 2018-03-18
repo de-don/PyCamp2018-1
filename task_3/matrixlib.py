@@ -1,5 +1,5 @@
 from array import array
-import numbers
+from numbers import Integral, Real
 from functools import reduce
 from collections import Iterable
 
@@ -17,7 +17,9 @@ def normalize(elements):
 
 
 def flatten(elements):
-    """Flattens list of lists into 1-d list
+    """Flattens list of lists into 1-d list.
+
+    Each list has the same size with others.
 
     """
     flattened = list()
@@ -39,7 +41,7 @@ class Matrix:
         if isinstance(elements, Iterable):
             iterator = iter(elements)
             # check if elements are numbers
-            if all(isinstance(rest, numbers.Real)
+            if all(isinstance(rest, Real)
                    for rest in iterator):
                 self._elements = [array('f', elements)]
             # che if all elements are iterable
@@ -63,6 +65,89 @@ class Matrix:
     def columns(self):
         return self._columns
 
+    @property
+    def size(self):
+        return self.rows, self.columns
+
+    def __len__(self):
+        return self.rows * self.columns
+
+    # ----------------------------------------------------------
+    # Work with elements of matrix
+    # ----------------------------------------------------------
+
+    def _split_indices(self, indices):
+        """Private method to process indices of matrix
+
+        Args:
+            indices(Tuple[slice]): pair of slices or ints.
+
+        Returns:
+            1) slice: first slice or None
+            2) slice: second slice or None
+        """
+        if isinstance(indices, tuple):
+            if len(indices) == 1:
+                return indices[0], None
+            elif len(indices) == 2:
+                return indices
+            else:
+                raise TypeError("Matrix indices consists of two elements")
+        elif isinstance(indices, slice) or isinstance(indices, Integral):
+            return indices, None
+        else:
+            raise TypeError("Matrix indices must be in, slice or tuple of them")
+
+    def __getitem__(self, index):
+        # Get indices of rows in columns.
+        r, c = self._split_indices(index)
+
+        temp_data = list()
+
+        # selecting rows of matrix
+        if r:
+            if isinstance(r, Integral) or isinstance(r, slice):
+                temp_data = list(self)
+
+        # selecting columns of matrix
+        if c:
+            if isinstance(r, Integral) or isinstance(r, slice):
+                temp_data = [row[c] for row in temp_data]
+
+        # create matrix from selected data
+        res_matrix = Matrix(temp_data)
+
+        # if res_matrix is 1 x 1, return numeric value
+        if res_matrix.size == (1, 1):
+            return res_matrix._elements[0][0]
+
+        if res_matrix.rows or res_matrix.columns == 0:
+            return None
+
+        return res_matrix
+
+    def __setitem__(self, key, value):
+        # Get indices of rows in columns.
+        r, c = self._split_indices(key)
+
+        # set single element of matrix
+        if isinstance(value, Integral) and isinstance(r, Integral) and isinstance(c, Integral):
+            self._elements[r][c] = value
+        # set single row of matrix
+        elif isinstance(value, Integral) and isinstance(r, Integral) and c is None:
+            row = array('f', value)
+            # check compatibility of rows length
+            if len(row) == self.columns:
+                self._elements[r] = len(row)
+            else:
+                raise IndexError('Wrong length of inserted row. '
+                                 'Must be less or equal to matrix row length')
+        else:
+            raise TypeError('Only single value or single row can be inserted')
+
+    # def __str__(self):
+        # pass
+
     def __repr__(self):
         matrix_format = "{}\n" * self._rows
         row_format = " {:>5} " * self._columns
@@ -73,60 +158,8 @@ class Matrix:
 
         return matrix_format.format(*matrix_rows)
 
-    def __len__(self):
-        return self.rows * self.columns
-
     def __iter__(self):
         return iter(self._elements)
-
-    def __getitem__(self, index):
-        cls = type(self)
-        if isinstance(index, tuple):
-            if len(index) == 1:
-                if isinstance(index[0], slice) or isinstance(index[0], numbers.Integral):
-                    return self._elements[index[0]]
-                else:
-                    raise TypeError("Index 0 must be integer of slice")
-            elif len(index) == 2:
-                if isinstance(index[0], numbers.Integral) and isinstance(index[1], numbers.Integral):
-                    return self._elements[index[0]][index[1]]
-
-                elif isinstance(index[0], slice) and isinstance(index[1], numbers.Integral):
-                    return Matrix([[t[index[1]]] for t in self._elements[index[0]]])
-
-                elif isinstance(index[0], numbers.Integral) and isinstance(index[1], slice):
-                    return Matrix([t for t in self._elements[index[0]][index[1]]])
-
-                elif isinstance(index[0], slice) and isinstance(index[1], slice):
-                    temp = [[i for i in t[index[1]]] for t in self._elements[index[0]]]
-                    return Matrix(temp)
-
-                else:
-                    raise TypeError(f'Indices have wrong type. Must be int or slice\n'
-                                    f'type({index[0]}) == {type(index[0])}\n'
-                                    f'type({index[1]}) == {type(index[1])}')
-            else:
-                raise TypeError(f'{index} format unacceptable')
-        # slicing returns new matrix
-        if isinstance(index, slice):
-            return cls(self._elements[index])
-        # integer index returns row of matrix as an array
-        elif isinstance(index, numbers.Integral):
-            return cls(self._elements[index])
-        else:
-            msg = '{.__name__} indices must be integers'
-            raise TypeError(msg.format(cls))
-
-    def __setitem__(self, key, value):
-        # to set any line with new value check if value is iterable
-        if isinstance(value, Iterable):
-            # length of value must be the same with row size
-            if len(value) == self.columns:
-                self._elements[key] = array('f', value)
-            else:
-                raise IndexError
-        else:
-            raise TypeError
 
     def __eq__(self, other):
         if isinstance(other, Matrix):
@@ -136,7 +169,7 @@ class Matrix:
 
     def __add__(self, other):
         # Matrix + Numeric
-        if isinstance(other, numbers.Real):
+        if isinstance(other, Real):
             result = [[i + other for i in el] for el in self._elements]
             return Matrix(result)
         # Matrix + Matrix
@@ -161,7 +194,7 @@ class Matrix:
 
     def __mul__(self, other):
         # Matrix * Numeric
-        if isinstance(other, numbers.Rational):
+        if isinstance(other, Real):
             result = [[i * other for i in el] for el in self._elements]
             return Matrix(result)
         else:
@@ -205,7 +238,7 @@ class Matrix:
     def __pow__(self, power, modulo=None):
         # Matrix ** Numeric
         # works only for square matrices
-        if isinstance(power, numbers.Integral) and (self.rows == self.columns):
+        if isinstance(power, Integral) and (self.rows == self.columns):
             # Returns even matrix if power is 0
             if power == 0:
                 return Matrix.even(self.rows)
@@ -250,5 +283,5 @@ class Matrix:
 
 
 if __name__ == '__main__':
-    print('ok')
+    print(list(Matrix([[1, 2], [2, 3]])))
 
