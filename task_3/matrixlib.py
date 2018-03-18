@@ -86,6 +86,7 @@ class Matrix:
             1) slice: first slice or None
             2) slice: second slice or None
         """
+
         if isinstance(indices, tuple):
             if len(indices) == 1:
                 return indices[0], None
@@ -96,22 +97,26 @@ class Matrix:
         elif isinstance(indices, slice) or isinstance(indices, Integral):
             return indices, None
         else:
-            raise TypeError("Matrix indices must be in, slice or tuple of them")
+            raise TypeError("Matrix indices must be int, slice or tuple of them")
 
     def __getitem__(self, index):
         # Get indices of rows in columns.
         r, c = self._split_indices(index)
 
-        temp_data = list()
+        temp_data = list(self)
 
         # selecting rows of matrix
-        if r:
-            if isinstance(r, Integral) or isinstance(r, slice):
-                temp_data = list(self)
+        if r is not None:
+            if isinstance(r, Integral):
+                temp_data = [temp_data[r]]
+            elif isinstance(r, slice):
+                temp_data = temp_data[r]
 
         # selecting columns of matrix
-        if c:
-            if isinstance(r, Integral) or isinstance(r, slice):
+        if c is not None:
+            if isinstance(c, Integral):
+                temp_data = [[row[c]] for row in temp_data]
+            elif isinstance(c, slice):
                 temp_data = [row[c] for row in temp_data]
 
         # create matrix from selected data
@@ -121,7 +126,7 @@ class Matrix:
         if res_matrix.size == (1, 1):
             return res_matrix._elements[0][0]
 
-        if res_matrix.rows or res_matrix.columns == 0:
+        if res_matrix.rows == 0 or res_matrix.columns == 0:
             return None
 
         return res_matrix
@@ -131,41 +136,58 @@ class Matrix:
         r, c = self._split_indices(key)
 
         # set single element of matrix
-        if isinstance(value, Integral) and isinstance(r, Integral) and isinstance(c, Integral):
+        if isinstance(value, Real) and isinstance(r, Integral) \
+                and isinstance(c, Integral):
             self._elements[r][c] = value
         # set single row of matrix
-        elif isinstance(value, Integral) and isinstance(r, Integral) and c is None:
+        elif isinstance(value, Iterable) and isinstance(r, Integral) \
+                and c is None:
             row = array('f', value)
             # check compatibility of rows length
             if len(row) == self.columns:
-                self._elements[r] = len(row)
+                self._elements[r] = row
             else:
                 raise IndexError('Wrong length of inserted row. '
                                  'Must be less or equal to matrix row length')
+        elif isinstance(value, Real) and isinstance(r, Integral) \
+                and c is None:
+            raise IndexError
         else:
             raise TypeError('Only single value or single row can be inserted')
 
-    # def __str__(self):
-        # pass
-
-    def __repr__(self):
-        matrix_format = "{}\n" * self._rows
-        row_format = " {:>5} " * self._columns
-        matrix_rows = list()
-        for row in self._elements:
-            r = row_format.format(*row.tolist())
-            matrix_rows.append(r)
-
-        return matrix_format.format(*matrix_rows)
-
     def __iter__(self):
         return iter(self._elements)
+
+    def __repr__(self):
+        # set format for each element
+        element = '{:.3f}'
+        tmp = element.format(3.23)
+        # get substrings for each element
+        elements = list()
+        for el in self._elements:
+            elements.append([element.format(e) for e in el])
+        # find the longest substring
+        maxstring = len(max(flatten(elements), key=len))
+        # add spaces to each substring that shorter than the longest one
+        # and compose them to matrix rows
+        elements = [' | '.join([e.rjust(maxstring)
+                                for e in el]) for el in elements]
+        return '\n'.join(elements)
+
+    def __str__(self):
+        s = f'Matrix {self.rows} x {self.columns}\n'
+        s += repr(self)
+        return s
 
     def __eq__(self, other):
         if isinstance(other, Matrix):
             return len(self) == len(other) and self._elements == other._elements
         else:
             return False
+
+    # ---------------------------------------------------------
+    # Addition operation
+    # ---------------------------------------------------------
 
     def __add__(self, other):
         # Matrix + Numeric
@@ -192,6 +214,24 @@ class Matrix:
         self._elements = (self + other)._elements
         return self
 
+    def __sub__(self, other):
+        return self + (-1) * other
+
+    # ------------------------------------------------------
+    # Substraction operation
+    # ------------------------------------------------------
+
+    # def __rsub__(self, other):
+    #     return self - other
+
+    def __isub__(self, other):
+        self._elements = (self - other)._elements
+        return self
+
+    # ------------------------------------------------------
+    # Multiplication matrix with number
+    # ------------------------------------------------------
+
     def __mul__(self, other):
         # Matrix * Numeric
         if isinstance(other, Real):
@@ -206,6 +246,10 @@ class Matrix:
     def __imul__(self, other):
         self._elements = (self * other)._elements
         return self
+
+    # ------------------------------------------------------
+    # Multiplication matrix with matrix
+    # ------------------------------------------------------
 
     def __matmul__(self, other):
         # Matrix * Matrix
@@ -225,15 +269,9 @@ class Matrix:
         self._elements = (self @ other)._elements
         return self
 
-    def __sub__(self, other):
-        return self + (-1) * other
-
-    # def __rsub__(self, other):
-    #     return self - other
-
-    def __isub__(self, other):
-        self._elements = (self - other)._elements
-        return self
+    # ------------------------------------------------------
+    # Matrix power operator
+    # ------------------------------------------------------
 
     def __pow__(self, power, modulo=None):
         # Matrix ** Numeric
@@ -258,9 +296,6 @@ class Matrix:
         self._elements = (self ** other)._elements
         return self
 
-    # def __invert__(self):
-        # pass
-
     def is_square_matrix(self):
         return self.rows == self.columns
 
@@ -283,5 +318,5 @@ class Matrix:
 
 
 if __name__ == '__main__':
-    print(list(Matrix([[1, 2], [2, 3]])))
+    print(Matrix([[1111111111111, 2, 5747.346], [2, 453]]))
 

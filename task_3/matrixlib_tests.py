@@ -30,6 +30,17 @@ class MatrixTester(TestCase):
 
         ]
 
+    def test_matrix_indices_processing(self):
+        t = Matrix([[1, 1], [1, 1]])
+        self.assertEqual(t._split_indices((slice(0, 2), 0)), (slice(0, 2), 0))
+        self.assertEqual(t._split_indices(
+            (slice(0, 2), slice(0, 2))), (slice(0, 2), slice(0, 2))
+        )
+        self.assertEqual(t._split_indices(slice(0, 2)), (slice(0, 2), None))
+        self.assertEqual(t._split_indices(0), (0, None))
+        with self.assertRaises(TypeError):
+            t._split_indices()
+
     def test_get_elements_of_matrix(self):
         test_matrix = self.matrices[8]  # 3 x 3 matrix
         self.assertTrue(isinstance(test_matrix[1, 1], float))
@@ -37,7 +48,7 @@ class MatrixTester(TestCase):
         self.assertTrue(isinstance(test_matrix[0, 0:2], Matrix))
         self.assertTrue(isinstance(test_matrix[0:2, 0:2], Matrix))
         with self.assertRaises(TypeError):
-            test_matrix[0.6, 2]
+            test_matrix[0.6]
         with self.assertRaises(TypeError):
             test_matrix[0.6, 2, 3]
 
