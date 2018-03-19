@@ -191,7 +191,6 @@ def list_of_matches_sorting():
     assert result2.output == result1.output
 
 
-
 if __name__ == '__main__':
     test_unique_matches()
 

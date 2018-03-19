@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import re
 import click
 from collections import Counter
@@ -28,7 +27,13 @@ def count_lines_with_matches(pattern, text_lines):
     return lines_count
 
 
-def output_stat_with_sorting_options(data, matches, stat='count', flag_s=None, flag_o=None):
+def output_stat_with_sorting_options(
+        data,
+        matches,
+        stat='count',
+        flag_s=None,
+        flag_o=None
+):
     """"""
     # check if sorted output intended
     if flag_s or flag_o:
@@ -45,7 +50,11 @@ def output_stat_with_sorting_options(data, matches, stat='count', flag_s=None, f
             click.echo('{: >15} | {: >5}'.format(st[0], st[1]))
 
 
-def output_data_with_sorting_options(data, flag_s=None, flag_o=None):
+def output_data_with_sorting_options(
+        data,
+        flag_s=None,
+        flag_o=None
+):
     """"""
     sorted_data = sorted(
         data,

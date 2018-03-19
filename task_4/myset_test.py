@@ -359,20 +359,3 @@ class MySetTests(TestCase):
         union_res = m1.union(m2, m3)
         self.assertEqual(m1 | m2 | m3, union_res)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
