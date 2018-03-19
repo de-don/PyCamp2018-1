@@ -283,6 +283,26 @@ class MySetTests(TestCase):
         m3 |= m2
         self.assertEqual(m1, m3)
 
+    def test_isdisjoint_method(self):
+        m1 = MySet(self.xor_data)
+        m2 = MySet(self.sub_res)
+        self.assertEqual(m1 & m2 == MySet(), m1.isdisjoint(m2))
+
+    def test_issubset_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.gt_data)
+        self.assertTrue(m1.issubset(m2))
+        self.assertEqual(m1 in m2, m1.issubset(m2))
+
+    def test_issuperset_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.gt_data)
+        self.assertTrue(m2.issuperset(m1))
+        self.assertTrue(m2.issuperset(m2))
+        self.assertEqual(m1 in m2, m2.issuperset(m1))
+        self.assertEqual(m2 in m2, m2.issuperset(m2))
+
+    # FIX TESTS
     def test_difference_method(self):
         difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
         self.assertEqual(
@@ -325,6 +345,13 @@ class MySetTests(TestCase):
             MySet(self.init_data) ^ MySet(self.or_data),
             m1
         )
+
+    def test_union_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.or_data)
+        self.assertEqual(m1 | m2, m1.union(m2))
+        self.assertEqual(m1.union(m2), m2.union(m1))
+
 
 
 

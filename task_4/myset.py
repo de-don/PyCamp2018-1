@@ -259,6 +259,20 @@ class MySet:
         """Remove all elements of another set from this set."""
         self -= other
 
+    def isdisjoint(self, other):
+        """Return True if two sets have a null intersection."""
+        return self & other == MySet()
+
+    def issubset(self, other):
+        """Report whether another set contains this set."""
+        return self in other
+
+    def issuperset(self, other):
+        """Report whether this set contains another set."""
+        return other in self
+
+    # !!! FIX FURTHER METHODS
+
     def intersection(self, other):
         """Return the intersection of two sets as a new set.
 
@@ -279,35 +293,14 @@ class MySet:
         """Update a set with the symmetric difference of itself and another."""
         self ^= other
 
+    def union(self, other):
+        """Return the union of sets as a new set.
+
+        (i.e. all elements that are in either set.)"""
+        return self | other
 
 
 
-
-
-
-
-
-    """class set(object)
- |  set() -> new empty set object
- |  set(iterable) -> new set object
- |  
- |  Build an unordered collection of unique elements.
- |  
- |  Methods defined here:
- |  
- |  isdisjoint(...)
- |      Return True if two sets have a null intersection.
- |  
- |  issubset(...)
- |      Report whether another set contains this set.
- |  
- |  issuperset(...)
- |      Report whether this set contains another set.
- |  
- |  union(...)
- |      Return the union of sets as a new set.
- |      
- |      (i.e. all elements that are in either set.)"""
 
 
 
