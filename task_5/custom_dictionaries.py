@@ -37,7 +37,7 @@ class ReadOnlyDictionary:
     def __setattr__(self, name, value):
         if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
-        elif name in self._dictionary_of_attributes.keys():
+        elif name in self.dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
         # super().__setattr__(name, value)
         else:

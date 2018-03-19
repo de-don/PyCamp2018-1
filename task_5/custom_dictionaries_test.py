@@ -48,6 +48,11 @@ class CustomDictionariesTests(TestCase):
     def test_my_dict_set_attribute(self):
         with self.assertRaises(AttributeError):
             self.dict3.three = 3
+        self.assertEqual(
+            self.dict3.dictionary_of_attributes,
+            self.data3
+        )
+
 
 
 
