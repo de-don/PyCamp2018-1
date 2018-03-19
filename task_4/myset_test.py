@@ -10,6 +10,8 @@ class MySetTests(TestCase):
         self.gt_data = [0, 1, 2, 3, 4, 5, 6, 7]
         self.or_data = [1, 2, 3, 6, 7]
         self.xor_data = [6, 7]
+        self.sub_data = [4, 5, 6, 7]
+        self.sub_res = [0, 1, 2, 3]
 
     def test_len(self):
         self.assertNotEqual(len(MySet(self.init_data)), len(self.init_data))
@@ -100,7 +102,6 @@ class MySetTests(TestCase):
         with self.assertRaises(TypeError):
             m2 &= {6, 7, 8}
 
-
     def test_or_operation(self):
         # __or__
         self.assertEqual(
@@ -168,6 +169,41 @@ class MySetTests(TestCase):
         self.assertEqual(id_before, id_after)
         with self.assertRaises(TypeError):
             m ^= {6, 7, 8}
+
+    def test_sub_operations(self):
+        # __sub__
+        self.assertEqual(
+            MySet(self.init_data) - MySet(self.sub_data),
+            MySet(self.sub_res)
+        )
+        self.assertEqual(
+            str(MySet(self.init_data) - MySet(self.check_data)),
+            'My set()'
+        )
+        with self.assertRaises(TypeError):
+            MySet(self.sub_res) - {56, 3, 2}
+
+        # __rsub__
+        self.assertEqual(
+            MySet(self.sub_data) - MySet(self.init_data),
+            MySet(set(self.sub_data) - set(self.init_data))
+        )
+        self.assertNotEqual(
+            MySet(self.init_data) - MySet(self.sub_data),
+            MySet(self.sub_data) - MySet(self.init_data)
+        )
+        with self.assertRaises(TypeError):
+             {56, 3, 2} - MySet(self.sub_res)
+
+        # __isub__
+        m = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        id_before = id(m)
+        m -= m2
+        id_after = id(m)
+        self.assertEqual(id_before, id_after)
+        with self.assertRaises(TypeError):
+            m -= {6, 7, 8}
 
 
 

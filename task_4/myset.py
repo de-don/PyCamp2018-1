@@ -106,14 +106,14 @@ class MySet:
     def __or__(self, other):
         """Return self|other."""
         if isinstance(other, MySet):
-            intersection = list()
+            union = list()
             for i in self._items:
                 if i in self._items or i in other._items:
-                    intersection.append(i)
+                    union.append(i)
             for i in other._items:
                 if i in self._items or i in other._items:
-                    intersection.append(i)
-            return MySet(intersection)
+                    union.append(i)
+            return MySet(union)
         else:
             raise TypeError('Both must be MySet()')
 
@@ -133,14 +133,14 @@ class MySet:
     def __xor__(self, other):
         """Return self^other."""
         if isinstance(other, MySet):
-            intersection = list()
+            symm_difference = list()
             for i in self._items:
                 if not (i in self._items and i in other._items):
-                    intersection.append(i)
+                    symm_difference.append(i)
             for i in other._items:
                 if not (i in other._items and i in self._items):
-                    intersection.append(i)
-            return MySet(intersection)
+                    symm_difference.append(i)
+            return MySet(symm_difference)
         else:
             raise TypeError('Both must be MySet()')
 
@@ -151,6 +151,30 @@ class MySet:
     def __ixor__(self, other):
         """Return self^=other"""
         self._items = (self ^ other)._items
+        return self
+
+    # --------------------------------------
+    # SUB operations
+    # --------------------------------------
+
+    def __sub__(self, other):
+        """Return self-other."""
+        if isinstance(other, MySet):
+            difference = list()
+            for i in self._items:
+                if i in self._items and i not in other._items:
+                    difference.append(i)
+            return MySet(difference)
+        else:
+            raise TypeError('Both must be MySet()')
+
+    def __rsub__(self, other):
+        """Return other-self"""
+        return self - other
+
+    def __isub__(self, other):
+        """Return self-=other"""
+        self._items = (self - other)._items
         return self
 
 
@@ -164,16 +188,7 @@ class MySet:
  |  
  |  Build an unordered collection of unique elements.
  |  
- |  Methods defined here: 
- |  __xor__(self, value, /)
- |      Return self^value.
- |  
- |  __rxor__(self, value, /)
- |      Return value^self.
- |  
- |  __ixor__(self, value, /)
- |      Return self^=value.
- 
+ |  Methods defined here:  
  |  
  |  __sub__(self, value, /)
  |      Return self-value.
