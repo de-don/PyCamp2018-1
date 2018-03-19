@@ -170,3 +170,4 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l, flag_s, flag_o, flag_n, 
 if __name__ == '__main__':
     searcher()
 
+

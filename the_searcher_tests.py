@@ -206,4 +206,3 @@ if __name__ == '__main__':
     test_stat_no_sorting()
     test_stat_sorting()
 
-
