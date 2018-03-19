@@ -266,7 +266,7 @@ class MySet:
         """Return the intersection of two sets as a new set.
 
         (i.e. all elements that are in both sets.)"""
-        result = self
+        result = MySet(self._items)
         for elem in args:
             result &= elem
         return result
@@ -282,7 +282,7 @@ class MySet:
         (i.e. all elements that are in this set but not the others.)
 
         """
-        result = self
+        result = MySet(self._items)
         for elem in args:
             result -= elem
         return result
@@ -296,7 +296,7 @@ class MySet:
         """Return the symmetric difference of two sets as a new set.
 
         (i.e. all elements that are in exactly one of the sets.)"""
-        result = self
+        result = MySet(self._items)
         for elem in args:
             result ^= elem
         return result
@@ -310,7 +310,7 @@ class MySet:
         """Return the union of sets as a new set.
 
         (i.e. all elements that are in either set.)"""
-        result = self
+        result = MySet(self._items)
         for elem in args:
             result |= elem
         return result
