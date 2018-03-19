@@ -271,6 +271,14 @@ class MySetTests(TestCase):
         with self.assertRaises(KeyError):
             m1.remove(remove_count)
 
+    def test_method_update(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        m1.update(m2)
+        m3 = MySet(self.init_data)
+        m3 |= m2
+        self.assertEqual(m1, m3)
+
 
 
 

@@ -243,6 +243,10 @@ class MySet:
         else:
             raise KeyError(f'MySet.items does not contain element {element}')
 
+    def update(self, value):
+        """Update a set with the union of itself and others."""
+        self |= value
+
 
 
 
@@ -257,11 +261,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here:
- |
- |  remove(...)
- |      Remove an element from a set; it must be a member.
- |
- |      If the element is not a member, raise a KeyError.
  |
  |  update(...)
  |      Update a set with the union of itself and others.
