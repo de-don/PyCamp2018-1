@@ -13,6 +13,12 @@ class MySetTests(TestCase):
         self.sub_data = [4, 5, 6, 7]
         self.sub_res = [0, 1, 2, 3]
 
+    def test_items_property(self):
+        m = MySet(self.init_data)
+        m2 = MySet()
+        self.assertTrue(isinstance(m.items, list))
+        self.assertEqual(m2.items, list())
+
     def test_len(self):
         self.assertNotEqual(len(MySet(self.init_data)), len(self.init_data))
         self.assertEqual(len(MySet(self.init_data)), len(self.check_data))
@@ -141,8 +147,8 @@ class MySetTests(TestCase):
     def test_xor_operation(self):
         # __xor__
         self.assertEqual(
-            str(MySet(self.init_data) ^ MySet(self.check_data)),
-            'My set()'
+            MySet(self.init_data) ^ MySet(self.check_data),
+            MySet()
         )
         self.assertEqual(
             MySet(self.init_data) ^ MySet(self.gt_data),
@@ -204,6 +210,17 @@ class MySetTests(TestCase):
         self.assertEqual(id_before, id_after)
         with self.assertRaises(TypeError):
             m -= {6, 7, 8}
+
+    def test_add_method(self):
+        m = MySet(self.init_data)
+        id1 = id(m)
+        m.add([1, 2, 3])
+        self.assertEqual(m, MySet(self.init_data))
+        m.add(self.sub_data)
+        self.assertNotEqual(m, MySet(self.init_data))
+        self.assertEqual(id(m), id1)
+
+
 
 
 

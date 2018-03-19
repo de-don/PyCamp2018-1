@@ -7,14 +7,19 @@ class MySet:
     """
     _items = None
 
-    def __init__(self, iterable):
+    def __init__(self, iterable=None):
         items = list()
 
-        for i in iterable:
-            if i not in items:
-                items.append(i)
+        if iterable is not None:
+            for i in iterable:
+                if i not in items:
+                    items.append(i)
 
         self._items = items
+
+    @property
+    def items(self):
+        return self._items
 
     def __len__(self):
         return len(self._items)
@@ -177,6 +182,26 @@ class MySet:
         self._items = (self - other)._items
         return self
 
+    # --------------------------------------------------
+    # public methods
+    # --------------------------------------------------
+
+    def add(self, element):
+        """Add an element to a set.
+
+        This has no effect if the element is already present.
+        """
+        if isinstance(element, Iterable):
+            for e in element:
+                if e not in self._items:
+                    self._items.append(e)
+        else:
+            if element not in self._items:
+                self._items.append(element)
+
+    def clear(self):
+        """Remove all elements from this set."""
+        self._items.clear()
 
 
 
@@ -189,25 +214,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here:  
- |  
- |  __sub__(self, value, /)
- |      Return self-value.
- |  
- |  __rsub__(self, value, /)
- |      Return value-self.
- |  
- |  __isub__(self, value, /)
- |      Return self-=value. 
- |  
- |  
- |  __reduce__(...)
- |      Return state information for pickling.
- |
- |  
- |  add(...)
- |      Add an element to a set.
- |      
- |      This has no effect if the element is already present.
  |  
  |  clear(...)
  |      Remove all elements from this set.
