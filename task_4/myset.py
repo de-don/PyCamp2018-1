@@ -7,13 +7,17 @@ class MySet:
     """
     _items = None
 
-    def __init__(self, iterable=None):
+    def __init__(self, values=None):
         items = list()
 
-        if iterable is not None:
-            for i in iterable:
-                if i not in items:
-                    items.append(i)
+        if values is not None:
+            if isinstance(values, Iterable):
+                for i in values:
+                    if i not in items:
+                        items.append(i)
+            else:
+                if values not in items:
+                    items.append(values)
 
         self._items = items
 
@@ -203,6 +207,11 @@ class MySet:
         """Remove all elements from this set."""
         self._items.clear()
 
+    def copy(self):
+        new_set = MySet()
+        new_set._items = self._items
+        return new_set
+
 
 
 
@@ -214,12 +223,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here:  
- |  
- |  clear(...)
- |      Remove all elements from this set.
- |  
- |  copy(...)
- |      Return a shallow copy of a set.
  |  
  |  difference(...)
  |      Return the difference of two or more sets as a new set.

@@ -13,6 +13,16 @@ class MySetTests(TestCase):
         self.sub_data = [4, 5, 6, 7]
         self.sub_res = [0, 1, 2, 3]
 
+    def test_init_myset(self):
+        m = MySet()
+        m1 = MySet(4)
+        m2 = MySet([1, 2])
+        self.assertTrue(isinstance(m, MySet))
+        self.assertTrue(isinstance(m1, MySet))
+        self.assertTrue(isinstance(m2, MySet))
+
+
+
     def test_items_property(self):
         m = MySet(self.init_data)
         m2 = MySet()
@@ -219,12 +229,22 @@ class MySetTests(TestCase):
         m.add(self.sub_data)
         self.assertNotEqual(m, MySet(self.init_data))
         self.assertEqual(id(m), id1)
+        m.add(76)
+        self.assertEqual(id(m), id1)
 
     def test_clear_method(self):
         m1 = MySet(self.init_data)
         m1.clear()
         m2 = MySet()
         self.assertEqual(m1, m2)
+
+    def test_copy(self):
+        m1 = MySet(self.init_data)
+        m2 = m1.copy()
+        self.assertEqual(m1, m2)
+        self.assertNotEqual(id(m1), id(m2))
+        self.assertEqual(id(m1.items), id(m2.items))
+
 
 
 
