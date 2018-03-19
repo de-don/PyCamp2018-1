@@ -52,6 +52,8 @@ class CustomDictionariesTests(TestCase):
             self.dict3.dictionary_of_attributes,
             self.data3
         )
+        with self.assertRaises(AttributeError):
+            self.dict3.one = 12
 
 
 
