@@ -247,6 +247,18 @@ class MySet:
         """Update a set with the union of itself and others."""
         self |= value
 
+    def difference(self, other):
+        """Return the difference of two or more sets as a new set.
+
+        (i.e. all elements that are in this set but not the others.)
+
+        """
+        return self - other
+
+    def difference_update(self, other):
+        """Remove all elements of another set from this set."""
+        self -= other
+
 
 
 
@@ -261,14 +273,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here:
- |
- |  update(...)
- |      Update a set with the union of itself and others.
- |  
- |  difference(...)
- |      Return the difference of two or more sets as a new set.
- |      
- |      (i.e. all elements that are in this set but not the others.)
  |  
  |  difference_update(...)
  |      Remove all elements of another set from this set.

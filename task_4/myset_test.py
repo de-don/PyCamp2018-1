@@ -279,6 +279,22 @@ class MySetTests(TestCase):
         m3 |= m2
         self.assertEqual(m1, m3)
 
+    def test_difference_method(self):
+        difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
+        self.assertEqual(
+            MySet(self.init_data) - MySet(self.sub_data),
+            difference_res
+        )
+
+    def test_difference_update_method(self):
+        m1 = MySet(self.init_data)
+        m1.difference_update(MySet(self.sub_data))
+        difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
+        self.assertEqual(m1, difference_res)
+
+
+
+
 
 
 
