@@ -2,6 +2,7 @@ from array import array
 from numbers import Integral, Real
 from functools import reduce
 from collections import Iterable
+from operator import add
 
 
 
@@ -38,21 +39,18 @@ class Matrix:
         # Matrix can be created only for iterable of numbers
         # and iterable of iterable of numbers
         # E.g. list of floats or list of array of ints
-        if isinstance(elements, Iterable):
-            iterator = iter(elements)
-            # check if elements are numbers
-            if all(isinstance(rest, Real)
-                   for rest in iterator):
-                self._elements = [array('f', elements)]
+        iterator = iter(elements)
+        # check if elements are numbers
+        if all(isinstance(rest, Real)
+                for rest in iterator):
+            self._elements = [array('f', elements)]
             # che if all elements are iterable
-            elif all(isinstance(rest, Iterable)
-                     for rest in iterator):
-                self._elements = [array('f', row)
-                                  for row in normalize(elements)]
-            else:
-                raise TypeError('All elements of data must be numbers or iterables')
+        elif all(isinstance(rest, Iterable)
+                 for rest in iterator):
+            self._elements = [array('f', row)
+                              for row in normalize(elements)]
         else:
-            raise TypeError('Data must be iterable')
+            raise TypeError('All elements of data must be numbers or iterables')
 
         self._rows = len(self._elements)
         self._columns = len(self._elements[0])
@@ -214,15 +212,12 @@ class Matrix:
         self._elements = (self + other)._elements
         return self
 
-    def __sub__(self, other):
-        return self + (-1) * other
-
     # ------------------------------------------------------
     # Substraction operation
     # ------------------------------------------------------
 
-    # def __rsub__(self, other):
-    #     return self - other
+    def __sub__(self, other):
+        return self + (-1) * other
 
     def __isub__(self, other):
         self._elements = (self - other)._elements
@@ -253,17 +248,27 @@ class Matrix:
 
     def __matmul__(self, other):
         # Matrix * Matrix
-        if isinstance(other, type(self)) and (self.columns == other.rows):
-            other_temp = other.transpose()
-            return Matrix([[reduce(
-                lambda x, y: x + y,
-                [a * b for a, b in zip(
-                    self._elements[r1],
-                    other_temp._elements[r2])])
-                for r2 in range(other_temp.rows)]
-                for r1 in range(self.rows)])
-        else:
+        if not isinstance(other, type(self)):
             raise TypeError
+
+        if self.columns == other.rows:
+            other_temp = other.transpose()
+            return Matrix(
+                [
+                    # get sum of production of row elements
+                    [reduce(
+                        add,
+                        # get productions of row elements with each other
+                        [a * b for a, b in zip(
+                            self._elements[r1],
+                            other_temp._elements[r2])]
+                    )
+                        for r2 in range(other_temp.rows)
+                    ]
+                    for r1 in range(self.rows)
+                ])
+        else:
+            raise IndexError
 
     def __imatmul__(self, other):
         self._elements = (self @ other)._elements
@@ -276,7 +281,10 @@ class Matrix:
     def __pow__(self, power, modulo=None):
         # Matrix ** Numeric
         # works only for square matrices
-        if isinstance(power, Integral) and (self.rows == self.columns):
+        if self.rows != self.columns:
+            raise ValueError('Can not find power of non-square matrix')
+
+        if isinstance(power, Integral):
             # Returns even matrix if power is 0
             if power == 0:
                 return Matrix.even(self.rows)
@@ -288,9 +296,9 @@ class Matrix:
                     base_val @= self
                 return base_val
             else:
-                raise TypeError
+                raise ValueError("Matrix power can't be negative")
         else:
-            raise TypeError
+            raise ValueError('Matrix power must be >= 0')
 
     def __ipow__(self, other):
         self._elements = (self ** other)._elements
@@ -308,7 +316,7 @@ class Matrix:
 
     @classmethod
     def zero(cls, rows, columns):
-        s = [[0 for i in range(columns)] for j in range(rows)]
+        s = [[0 for _ in range(columns)] for _ in range(rows)]
         return cls(s)
 
     @classmethod

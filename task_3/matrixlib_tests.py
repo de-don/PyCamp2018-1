@@ -30,6 +30,10 @@ class MatrixTester(TestCase):
 
         ]
 
+    def test_pass_number(self):
+        with self.assertRaises(TypeError):
+            Matrix(4)
+
     def test_matrix_indices_processing(self):
         t = Matrix([[1, 1], [1, 1]])
         self.assertEqual(t._split_indices((slice(0, 2), 0)), (slice(0, 2), 0))
@@ -109,6 +113,7 @@ class MatrixTester(TestCase):
         self.assertEqual(self.matrices[9], self.matrices[8].transpose())
         self.assertEqual(self.matrices[10], self.matrices[11].transpose())
         self.assertEqual(self.matrices[10], self.matrices[10].transpose().transpose())
+        self.assertEqual(self.matrices[9], self.matrices[8].transpose())
 
     def test_matrix_power(self):
         self.assertEqual(
@@ -131,10 +136,12 @@ class MatrixTester(TestCase):
             self.matrices[9] ** 1,
             self.matrices[9]
         )
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             self.matrices[8] ** -2
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             self.matrices[8] ** 2.45
+        with self.assertRaises(ValueError):
+            self.matrices[10] ** 2
 
     def test_matrix_mul_matrix(self):
         self.assertEqual(self.matrices[12] @ self.matrices[13], self.matrices[14])
