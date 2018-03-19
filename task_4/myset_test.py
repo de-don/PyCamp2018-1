@@ -220,7 +220,11 @@ class MySetTests(TestCase):
         self.assertNotEqual(m, MySet(self.init_data))
         self.assertEqual(id(m), id1)
 
-
+    def test_clear_method(self):
+        m1 = MySet(self.init_data)
+        m1.clear()
+        m2 = MySet()
+        self.assertEqual(m1, m2)
 
 
 
