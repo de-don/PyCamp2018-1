@@ -259,6 +259,27 @@ class MySet:
         """Remove all elements of another set from this set."""
         self -= other
 
+    def intersection(self, other):
+        """Return the intersection of two sets as a new set.
+
+        (i.e. all elements that are in both sets.)"""
+        return self & other
+
+    def intersection_update(self, other):
+        """Update a set with the intersection of itself and another."""
+        self &= other
+
+    def symmetric_difference(self, other):
+        """Return the symmetric difference of two sets as a new set.
+
+        (i.e. all elements that are in exactly one of the sets.)"""
+        return self ^ other
+
+    def symmetric_difference_update(self, other):
+        """Update a set with the symmetric difference of itself and another."""
+        self ^= other
+
+
 
 
 
@@ -274,17 +295,6 @@ class MySet:
  |  
  |  Methods defined here:
  |  
- |  difference_update(...)
- |      Remove all elements of another set from this set.
- |  
- |  intersection(...)
- |      Return the intersection of two sets as a new set.
- |      
- |      (i.e. all elements that are in both sets.)
- |  
- |  intersection_update(...)
- |      Update a set with the intersection of itself and another.
- |  
  |  isdisjoint(...)
  |      Return True if two sets have a null intersection.
  |  
@@ -293,14 +303,6 @@ class MySet:
  |  
  |  issuperset(...)
  |      Report whether this set contains another set.
- |  
- |  symmetric_difference(...)
- |      Return the symmetric difference of two sets as a new set.
- |      
- |      (i.e. all elements that are in exactly one of the sets.)
- |  
- |  symmetric_difference_update(...)
- |      Update a set with the symmetric difference of itself and another.
  |  
  |  union(...)
  |      Return the union of sets as a new set.

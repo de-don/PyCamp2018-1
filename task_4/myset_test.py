@@ -95,6 +95,10 @@ class MySetTests(TestCase):
             MySet(self.init_data) & MySet(self.gt_data),
             MySet(self.gt_data)
         )
+        self.assertEqual(
+            MySet(self.init_data) & MySet(),
+            MySet()
+        )
         with self.assertRaises(TypeError):
             MySet(self.init_data) & {6, 7, 8}
 
@@ -292,6 +296,35 @@ class MySetTests(TestCase):
         difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
         self.assertEqual(m1, difference_res)
 
+    def test_intersection_method(self):
+        intersection_res = MySet(self.init_data) & MySet(self.or_data)
+        self.assertEqual(
+            MySet(self.init_data) & MySet(self.or_data),
+            intersection_res
+        )
+
+    def test_intersection_update_method(self):
+        m1 = MySet(self.init_data)
+        m1.intersection_update(MySet(self.or_data))
+        self.assertEqual(
+            MySet(self.init_data) & MySet(self.or_data),
+            m1
+        )
+
+    def test_symmetric_difference_method(self):
+        symmetric_difference_res = MySet(self.init_data) ^ MySet(self.or_data)
+        self.assertEqual(
+            MySet(self.init_data) ^ MySet(self.or_data),
+            symmetric_difference_res
+        )
+
+    def test_symmetric_difference_method(self):
+        m1 = MySet(self.init_data)
+        m1.symmetric_difference_update(MySet(self.or_data))
+        self.assertEqual(
+            MySet(self.init_data) ^ MySet(self.or_data),
+            m1
+        )
 
 
 
