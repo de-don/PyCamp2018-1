@@ -243,22 +243,6 @@ class MySet:
         else:
             raise KeyError(f'MySet.items does not contain element {element}')
 
-    def update(self, value):
-        """Update a set with the union of itself and others."""
-        self |= value
-
-    def difference(self, other):
-        """Return the difference of two or more sets as a new set.
-
-        (i.e. all elements that are in this set but not the others.)
-
-        """
-        return self - other
-
-    def difference_update(self, other):
-        """Remove all elements of another set from this set."""
-        self -= other
-
     def isdisjoint(self, other):
         """Return True if two sets have a null intersection."""
         return self & other == MySet()
@@ -273,31 +257,63 @@ class MySet:
 
     # !!! FIX FURTHER METHODS
 
-    def intersection(self, other):
+    def update(self, *args):
+        """Update a set with the union of itself and others."""
+        for elem in args:
+            self |= elem
+
+    def intersection(self, *args):
         """Return the intersection of two sets as a new set.
 
         (i.e. all elements that are in both sets.)"""
-        return self & other
+        result = self
+        for elem in args:
+            result &= elem
+        return result
 
-    def intersection_update(self, other):
+    def intersection_update(self, *args):
         """Update a set with the intersection of itself and another."""
-        self &= other
+        for elem in args:
+            self &= elem
 
-    def symmetric_difference(self, other):
+    def difference(self, *args):
+        """Return the difference of two or more sets as a new set.
+
+        (i.e. all elements that are in this set but not the others.)
+
+        """
+        result = self
+        for elem in args:
+            result -= elem
+        return result
+
+    def difference_update(self, *args):
+        """Remove all elements of another set from this set."""
+        for elem in args:
+            self -= elem
+
+    def symmetric_difference(self, *args):
         """Return the symmetric difference of two sets as a new set.
 
         (i.e. all elements that are in exactly one of the sets.)"""
-        return self ^ other
+        result = self
+        for elem in args:
+            result ^= elem
+        return result
 
-    def symmetric_difference_update(self, other):
+    def symmetric_difference_update(self, *args):
         """Update a set with the symmetric difference of itself and another."""
-        self ^= other
+        for elem in args:
+            self ^= elem
 
-    def union(self, other):
+    def union(self, *args):
         """Return the union of sets as a new set.
 
         (i.e. all elements that are in either set.)"""
-        return self | other
+        result = self
+        for elem in args:
+            result |= elem
+        return result
 
 
 

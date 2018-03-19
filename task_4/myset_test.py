@@ -12,6 +12,7 @@ class MySetTests(TestCase):
         self.xor_data = [6, 7]
         self.sub_data = [4, 5, 6, 7]
         self.sub_res = [0, 1, 2, 3]
+        self.update_data = [8, 9, 10]
 
     def test_init_myset(self):
         m = MySet()
@@ -275,14 +276,6 @@ class MySetTests(TestCase):
         with self.assertRaises(KeyError):
             m1.remove(remove_count)
 
-    def test_method_update(self):
-        m1 = MySet(self.init_data)
-        m2 = MySet(self.sub_data)
-        m1.update(m2)
-        m3 = MySet(self.init_data)
-        m3 |= m2
-        self.assertEqual(m1, m3)
-
     def test_isdisjoint_method(self):
         m1 = MySet(self.xor_data)
         m2 = MySet(self.sub_res)
@@ -303,54 +296,68 @@ class MySetTests(TestCase):
         self.assertEqual(m2 in m2, m2.issuperset(m2))
 
     # FIX TESTS
-    def test_difference_method(self):
-        difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
-        self.assertEqual(
-            MySet(self.init_data) - MySet(self.sub_data),
-            difference_res
-        )
-
-    def test_difference_update_method(self):
+    def test_update_method(self):
         m1 = MySet(self.init_data)
-        m1.difference_update(MySet(self.sub_data))
-        difference_res = MySet(self.init_data).difference(MySet(self.sub_data))
-        self.assertEqual(m1, difference_res)
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        m1.update(m2, m3)
+        m4 = MySet(self.init_data)
+        id1 = id(m4)
+        m4 |= m2 | m3
+        self.assertEqual(m1, m4)
+        self.assertEqual(id1, id(m4))
 
     def test_intersection_method(self):
-        intersection_res = MySet(self.init_data) & MySet(self.or_data)
-        self.assertEqual(
-            MySet(self.init_data) & MySet(self.or_data),
-            intersection_res
-        )
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        intersection_res = m1.intersection(m2, m3)
+        self.assertEqual(m1 & m2 & m3, intersection_res)
 
     def test_intersection_update_method(self):
         m1 = MySet(self.init_data)
-        m1.intersection_update(MySet(self.or_data))
-        self.assertEqual(
-            MySet(self.init_data) & MySet(self.or_data),
-            m1
-        )
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        m1.intersection_update(m2, m3)
+        m4 = MySet(self.init_data)
+        self.assertEqual(m4 & m2 & m3, m1)
 
-    def test_symmetric_difference_method(self):
-        symmetric_difference_res = MySet(self.init_data) ^ MySet(self.or_data)
-        self.assertEqual(
-            MySet(self.init_data) ^ MySet(self.or_data),
-            symmetric_difference_res
-        )
+    def test_difference_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        difference_res = m1.difference(m2, m3)
+        self.assertEqual(m1 - m2 - m3, difference_res)
+
+    def test_difference_update_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        m1.difference_update(m2, m3)
+        m4 = MySet(self.init_data)
+        self.assertEqual(m4 - m2 - m3, m1)
 
     def test_symmetric_difference_method(self):
         m1 = MySet(self.init_data)
-        m1.symmetric_difference_update(MySet(self.or_data))
-        self.assertEqual(
-            MySet(self.init_data) ^ MySet(self.or_data),
-            m1
-        )
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        sym_difference_res = m1.symmetric_difference(m2, m3)
+        self.assertEqual(m1 ^ m2 ^ m3, sym_difference_res)
+
+    def test_symmetric_difference_update_method(self):
+        m1 = MySet(self.init_data)
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        m1.symmetric_difference_update(m2, m3)
+        m4 = MySet(self.init_data)
+        self.assertEqual(m4 ^ m2 ^ m3, m1)
 
     def test_union_method(self):
         m1 = MySet(self.init_data)
-        m2 = MySet(self.or_data)
-        self.assertEqual(m1 | m2, m1.union(m2))
-        self.assertEqual(m1.union(m2), m2.union(m1))
+        m2 = MySet(self.sub_data)
+        m3 = MySet(self.update_data)
+        union_res = m1.union(m2, m3)
+        self.assertEqual(m1 | m2 | m3, union_res)
 
 
 
