@@ -19,7 +19,7 @@ class MySet:
                 if values not in items:
                     items.append(values)
 
-        self._items = items
+        self._items = sorted(items)
 
     @property
     def items(self):
@@ -56,7 +56,7 @@ class MySet:
     def __eq__(self, value):
         """Return self==value."""
         if isinstance(value, MySet):
-            return sorted(self._items) == sorted(value._items)
+            return self._items == value._items
             # !!! check with in operator
         else:
             raise TypeError('Cannot compare MySet with other types')
@@ -208,6 +208,7 @@ class MySet:
         else:
             if element not in self._items:
                 self._items.append(element)
+        self._items = sorted(self._items)
 
     def clear(self):
         """Remove all elements from this set."""
@@ -220,6 +221,16 @@ class MySet:
         """
         if element in self._items:
             self._items.remove(element)
+
+    def pop(self):
+        """Remove an element from a set if it is a member.
+
+        If the element is not a member, do nothing.
+        """
+        if self._items:
+            return self._items.pop(0)
+        else:
+            raise KeyError('MySet.items is empty')
 
 
 
@@ -234,10 +245,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here:
- |
- |  pop(...)
- |      Remove and return an arbitrary set element.
- |      Raises KeyError if the set is empty.
  |
  |  remove(...)
  |      Remove an element from a set; it must be a member.

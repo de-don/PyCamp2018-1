@@ -252,6 +252,15 @@ class MySetTests(TestCase):
         m1.discard(0)
         self.assertNotEqual(m1, MySet(self.init_data))
 
+    def test_pop_method(self):
+        m1 = MySet(self.check_data)
+        pop_count = 0
+        while m1.items:
+            self.assertEqual(m1.pop(), self.check_data[pop_count])
+            pop_count += 1
+        with self.assertRaises(KeyError):
+            m1.pop()
+
 
 
 
