@@ -24,7 +24,7 @@ class MySet:
             # tmp = '{' + ' '.join(str(i) for i in self._items) + '}'
             return '{' + ', '.join(str(i) for i in self._items) + '}'
         else:
-            return 'set()'
+            return 'My set()'
 
     def __iter__(self):
         return iter(self._items)
@@ -44,11 +44,89 @@ class MySet:
     # comparison operations
     # --------------------------------------------
 
-    def __eq__(self, other):
-        if isinstance(other, MySet):
-            return self._items == other._items
+    def __eq__(self, value):
+        """Return self==value."""
+        if isinstance(value, MySet):
+            return sorted(self._items) == sorted(value._items)
+            # !!! check with in operator
         else:
             raise TypeError('Cannot compare MySet with other types')
+
+    def __gt__(self, value):
+        """Return self>value."""
+        if isinstance(value, MySet):
+            return all(o in self._items for o in value._items) \
+                   and not all(i in value._items for i in self._items)
+        else:
+            raise TypeError('Cannot compare MySet with other types')
+
+    def __ge__(self, value):
+        """Return self>=value."""
+        return self > value or self == value
+
+    def __lt__(self, other):
+        """Return self<value."""
+        return not(self >= other)
+
+    def __le__(self, other):
+        """Return self<=value."""
+        return not(self > other)
+
+    # --------------------------------------------
+    # AND operations
+    # --------------------------------------------
+
+    def __and__(self, other):
+        """Return self&other."""
+        if isinstance(other, MySet):
+            intersection = list()
+            for i in self._items:
+                if i in self._items and i in other._items:
+                    intersection.append(i)
+            for i in other._items:
+                if i in self._items and i in other._items:
+                    intersection.append(i)
+            return MySet(intersection)
+        else:
+            raise TypeError('Both must be MySet()')
+
+    def __rand__(self, other):
+        """Return other&self."""
+        return self & other
+
+    def __iand__(self, other):
+        """Return self&=other"""
+        self._items = (self & other)._items
+        return self
+
+    # --------------------------------------------
+    # OR operations
+    # --------------------------------------------
+
+    def __or__(self, other):
+        """Return self|other."""
+        if isinstance(other, MySet):
+            intersection = list()
+            for i in self._items:
+                if i in self._items or i in other._items:
+                    intersection.append(i)
+            for i in other._items:
+                if i in self._items or i in other._items:
+                    intersection.append(i)
+            return MySet(intersection)
+        else:
+            raise TypeError('Both must be MySet()')
+
+    def __ror__(self, other):
+        """Return other|self."""
+        return self | other
+
+    def __ior__(self, other):
+        """Return self|=other."""
+        self._items = (self | other)._items
+        return self
+
+
 
 
 
@@ -59,65 +137,41 @@ class MySet:
  |  
  |  Build an unordered collection of unique elements.
  |  
- |  Methods defined here:
- |  
- |  __eq__(self, value, /)
- |      Return self==value.
- |  
- |  __ge__(self, value, /)
- |      Return self>=value.
- |  
- |  __gt__(self, value, /)
- |      Return self>value.
- |  
- |  __le__(self, value, /)
- |      Return self<=value.
- |  
- |  __ne__(self, value, /)
- |      Return self!=value.
- |  
- |  __lt__(self, value, /)
- |      Return self<value.
- |
- |  
- |  __and__(self, value, /)
- |      Return self&value.
- |  
- |  __iand__(self, value, /)
- |      Return self&=value.
- |  
- |  __ior__(self, value, /)
- |      Return self|=value.
- |  
- |  __isub__(self, value, /)
- |      Return self-=value.
- |  
- |  __ixor__(self, value, /)
- |      Return self^=value.
+ |  Methods defined here: 
  |  
  |  __or__(self, value, /)
  |      Return self|value.
  |  
- |  __rand__(self, value, /)
- |      Return value&self.
- |  
- |  __reduce__(...)
- |      Return state information for pickling.
- |  
  |  __ror__(self, value, /)
  |      Return value|self.
  |  
- |  __rsub__(self, value, /)
- |      Return value-self.
- |  
- |  __rxor__(self, value, /)
- |      Return value^self.
+ |  __ior__(self, value, /)
+ |      Return self|=value.
+ 
  |  
  |  __sub__(self, value, /)
  |      Return self-value.
  |  
+ |  __rsub__(self, value, /)
+ |      Return value-self.
+ |  
+ |  __isub__(self, value, /)
+ |      Return self-=value.
+ 
+ |  
  |  __xor__(self, value, /)
  |      Return self^value.
+ |  
+ |  __rxor__(self, value, /)
+ |      Return value^self.
+ |  
+ |  __ixor__(self, value, /)
+ |      Return self^=value.
+ 
+ |  
+ |  __reduce__(...)
+ |      Return state information for pickling.
+ 
  |  
  |  add(...)
  |      Add an element to a set.
