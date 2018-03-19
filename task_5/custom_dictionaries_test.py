@@ -46,8 +46,8 @@ class CustomDictionariesTests(TestCase):
             a = self.dict1.three
 
     def test_my_dict_set_attribute(self):
-        self.dict3.three = 3
-        self.assertTrue(self.dict3.three)
+        with self.assertRaises(AttributeError):
+            self.dict3.three = 3
 
 
 

@@ -3,6 +3,9 @@ class ReadOnlyDictionary:
     values using attributes
 
     """
+
+    _dictionary_of_attributes = {'_dictionary_of_attributes': 1}
+
     def __init__(self, dictionary):
         if not isinstance(dictionary, dict):
             raise TypeError('Input data must Python dict()')
@@ -32,9 +35,14 @@ class ReadOnlyDictionary:
         raise AttributeError('No such attribute')
 
     def __setattr__(self, name, value):
-        if name in self.dictionary_of_attributes.keys():
+        if name == '_dictionary_of_attributes':
+            super().__setattr__(name, value)
+        elif name in self._dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
-        super().__setattr__(name, value)
+        # super().__setattr__(name, value)
+        else:
+            raise AttributeError('Attribute add if forbidden')
+
 
 
 
