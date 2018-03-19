@@ -190,6 +190,12 @@ class MySet:
     # public methods
     # --------------------------------------------------
 
+    def copy(self):
+        """Return shallow copy of MySet object"""
+        new_set = MySet()
+        new_set._items = self._items
+        return new_set
+
     def add(self, element):
         """Add an element to a set.
 
@@ -207,10 +213,15 @@ class MySet:
         """Remove all elements from this set."""
         self._items.clear()
 
-    def copy(self):
-        new_set = MySet()
-        new_set._items = self._items
-        return new_set
+    def discard(self, element):
+        """Remove an element from a set if it is a member.
+
+        If the element is not a member, do nothing.
+        """
+        if element in self._items:
+            self._items.remove(element)
+
+
 
 
 
@@ -222,7 +233,19 @@ class MySet:
  |  
  |  Build an unordered collection of unique elements.
  |  
- |  Methods defined here:  
+ |  Methods defined here:
+ |
+ |  pop(...)
+ |      Remove and return an arbitrary set element.
+ |      Raises KeyError if the set is empty.
+ |
+ |  remove(...)
+ |      Remove an element from a set; it must be a member.
+ |
+ |      If the element is not a member, raise a KeyError.
+ |
+ |  update(...)
+ |      Update a set with the union of itself and others.
  |  
  |  difference(...)
  |      Return the difference of two or more sets as a new set.
@@ -231,11 +254,6 @@ class MySet:
  |  
  |  difference_update(...)
  |      Remove all elements of another set from this set.
- |  
- |  discard(...)
- |      Remove an element from a set if it is a member.
- |      
- |      If the element is not a member, do nothing.
  |  
  |  intersection(...)
  |      Return the intersection of two sets as a new set.
@@ -254,15 +272,6 @@ class MySet:
  |  issuperset(...)
  |      Report whether this set contains another set.
  |  
- |  pop(...)
- |      Remove and return an arbitrary set element.
- |      Raises KeyError if the set is empty.
- |  
- |  remove(...)
- |      Remove an element from a set; it must be a member.
- |      
- |      If the element is not a member, raise a KeyError.
- |  
  |  symmetric_difference(...)
  |      Return the symmetric difference of two sets as a new set.
  |      
@@ -274,10 +283,7 @@ class MySet:
  |  union(...)
  |      Return the union of sets as a new set.
  |      
- |      (i.e. all elements that are in either set.)
- |  
- |  update(...)
- |      Update a set with the union of itself and others."""
+ |      (i.e. all elements that are in either set.)"""
 
 
 

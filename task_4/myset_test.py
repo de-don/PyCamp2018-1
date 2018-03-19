@@ -245,6 +245,13 @@ class MySetTests(TestCase):
         self.assertNotEqual(id(m1), id(m2))
         self.assertEqual(id(m1.items), id(m2.items))
 
+    def test_discard_method(self):
+        m1 = MySet(self.init_data)
+        m1.discard(234)
+        self.assertEqual(m1, MySet(self.init_data))
+        m1.discard(0)
+        self.assertNotEqual(m1, MySet(self.init_data))
+
 
 
 
