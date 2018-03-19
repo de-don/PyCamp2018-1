@@ -126,6 +126,33 @@ class MySet:
         self._items = (self | other)._items
         return self
 
+    # --------------------------------------------
+    # XOR operations
+    # --------------------------------------------
+
+    def __xor__(self, other):
+        """Return self^other."""
+        if isinstance(other, MySet):
+            intersection = list()
+            for i in self._items:
+                if not (i in self._items and i in other._items):
+                    intersection.append(i)
+            for i in other._items:
+                if not (i in other._items and i in self._items):
+                    intersection.append(i)
+            return MySet(intersection)
+        else:
+            raise TypeError('Both must be MySet()')
+
+    def __rxor__(self, other):
+        """Return other^self"""
+        return self ^ other
+
+    def __ixor__(self, other):
+        """Return self^=other"""
+        self._items = (self ^ other)._items
+        return self
+
 
 
 
@@ -138,27 +165,6 @@ class MySet:
  |  Build an unordered collection of unique elements.
  |  
  |  Methods defined here: 
- |  
- |  __or__(self, value, /)
- |      Return self|value.
- |  
- |  __ror__(self, value, /)
- |      Return value|self.
- |  
- |  __ior__(self, value, /)
- |      Return self|=value.
- 
- |  
- |  __sub__(self, value, /)
- |      Return self-value.
- |  
- |  __rsub__(self, value, /)
- |      Return value-self.
- |  
- |  __isub__(self, value, /)
- |      Return self-=value.
- 
- |  
  |  __xor__(self, value, /)
  |      Return self^value.
  |  
@@ -169,9 +175,19 @@ class MySet:
  |      Return self^=value.
  
  |  
+ |  __sub__(self, value, /)
+ |      Return self-value.
+ |  
+ |  __rsub__(self, value, /)
+ |      Return value-self.
+ |  
+ |  __isub__(self, value, /)
+ |      Return self-=value. 
+ |  
+ |  
  |  __reduce__(...)
  |      Return state information for pickling.
- 
+ |
  |  
  |  add(...)
  |      Add an element to a set.

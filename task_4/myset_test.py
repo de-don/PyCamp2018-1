@@ -9,6 +9,7 @@ class MySetTests(TestCase):
         self.check_data = [0, 1, 2, 3, 4, 5]
         self.gt_data = [0, 1, 2, 3, 4, 5, 6, 7]
         self.or_data = [1, 2, 3, 6, 7]
+        self.xor_data = [6, 7]
 
     def test_len(self):
         self.assertNotEqual(len(MySet(self.init_data)), len(self.init_data))
@@ -134,7 +135,41 @@ class MySetTests(TestCase):
         self.assertEqual(m, m2)
         self.assertEqual(id_before, id_after)
         with self.assertRaises(TypeError):
-            m &= {6, 7, 8}
+            m |= {6, 7, 8}
+
+    def test_xor_operation(self):
+        # __xor__
+        self.assertEqual(
+            str(MySet(self.init_data) ^ MySet(self.check_data)),
+            'My set()'
+        )
+        self.assertEqual(
+            MySet(self.init_data) ^ MySet(self.gt_data),
+            MySet(self.xor_data)
+        )
+        with self.assertRaises(TypeError):
+            MySet(self.init_data) ^ {1, 2, 3, 7, 8}
+
+        # __rxor__
+        self.assertEqual(
+            MySet(self.init_data) ^ MySet(self.gt_data),
+            MySet(self.gt_data) ^ MySet(self.init_data)
+        )
+        with self.assertRaises(TypeError):
+            {1, 2, 3, 7, 8} ^ MySet(self.init_data)
+
+        # __ixor__
+        m = MySet(self.init_data)
+        m2 = MySet(self.gt_data)
+        id_before = id(m)
+        m ^= m2
+        id_after = id(m)
+        self.assertNotEqual(m, m2 ^ m)
+        self.assertEqual(id_before, id_after)
+        with self.assertRaises(TypeError):
+            m ^= {6, 7, 8}
+
+
 
 
 
