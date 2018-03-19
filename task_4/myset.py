@@ -232,6 +232,18 @@ class MySet:
         else:
             raise KeyError('MySet.items is empty')
 
+    def remove(self, element):
+        """Remove an element from a set; it must be a member.
+
+        If the element is not a member, raise a KeyError.
+
+        """
+        if element in self._items:
+            self._items.remove(element)
+        else:
+            raise KeyError(f'MySet.items does not contain element {element}')
+
+
 
 
 

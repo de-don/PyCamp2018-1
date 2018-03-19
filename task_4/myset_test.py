@@ -261,6 +261,16 @@ class MySetTests(TestCase):
         with self.assertRaises(KeyError):
             m1.pop()
 
+    def test_remove_method(self):
+        d1 = [0, 1, 2, 3, 4, 5]
+        m1 = MySet([0, 1, 2, 3, 4, 5])
+        remove_count = 0
+        while m1.items:
+            self.assertEqual(m1.remove(remove_count), d1.remove(remove_count))
+            remove_count += 1
+        with self.assertRaises(KeyError):
+            m1.remove(remove_count)
+
 
 
 
