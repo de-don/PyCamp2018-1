@@ -19,6 +19,17 @@ class MySetTests(TestCase):
         self.assertFalse(7 in MySet(self.init_data))
         self.assertFalse([1, 2, 3, 7] in MySet(self.init_data))
 
+    def test_repr_of_myset(self):
+        a = str(set(self.init_data))
+        b = str(MySet(self.init_data))
+        self.assertEqual(a, b)
+
+    def test_equality(self):
+        self.assertEqual(MySet(self.init_data), MySet(self.check_data))
+        with self.assertRaises(TypeError):
+            MySet(self.init_data) == self.init_data
+
+
 
 
 

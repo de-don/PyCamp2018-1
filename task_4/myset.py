@@ -2,7 +2,7 @@ from collections import Iterable
 
 
 class MySet:
-    """Class that supports all utility of standart set()
+    """Class that supports all utility of Python set()
 
     """
     _items = None
@@ -16,11 +16,18 @@ class MySet:
 
         self._items = items
 
-    def __iter__(self):
-        return iter(self._items)
-
     def __len__(self):
         return len(self._items)
+
+    def __repr__(self):
+        if self._items:
+            # tmp = '{' + ' '.join(str(i) for i in self._items) + '}'
+            return '{' + ', '.join(str(i) for i in self._items) + '}'
+        else:
+            return 'set()'
+
+    def __iter__(self):
+        return iter(self._items)
 
     def __contains__(self, item):
         # for cases of iterable argument
@@ -33,6 +40,16 @@ class MySet:
         # for cases of single value
         return item in self._items
 
+    # --------------------------------------------
+    # comparison operations
+    # --------------------------------------------
+
+    def __eq__(self, other):
+        if isinstance(other, MySet):
+            return self._items == other._items
+        else:
+            raise TypeError('Cannot compare MySet with other types')
+
 
 
 
@@ -44,9 +61,6 @@ class MySet:
  |  
  |  Methods defined here:
  |  
- |  __and__(self, value, /)
- |      Return self&value.
- |  
  |  __eq__(self, value, /)
  |      Return self==value.
  |  
@@ -55,6 +69,19 @@ class MySet:
  |  
  |  __gt__(self, value, /)
  |      Return self>value.
+ |  
+ |  __le__(self, value, /)
+ |      Return self<=value.
+ |  
+ |  __ne__(self, value, /)
+ |      Return self!=value.
+ |  
+ |  __lt__(self, value, /)
+ |      Return self<value.
+ |
+ |  
+ |  __and__(self, value, /)
+ |      Return self&value.
  |  
  |  __iand__(self, value, /)
  |      Return self&=value.
@@ -68,15 +95,6 @@ class MySet:
  |  __ixor__(self, value, /)
  |      Return self^=value.
  |  
- |  __le__(self, value, /)
- |      Return self<=value.
- |  
- |  __lt__(self, value, /)
- |      Return self<value.
- |  
- |  __ne__(self, value, /)
- |      Return self!=value.
- |  
  |  __or__(self, value, /)
  |      Return self|value.
  |  
@@ -85,9 +103,6 @@ class MySet:
  |  
  |  __reduce__(...)
  |      Return state information for pickling.
- |  
- |  __repr__(self, /)
- |      Return repr(self).
  |  
  |  __ror__(self, value, /)
  |      Return value|self.
