@@ -112,3 +112,37 @@ class ReadModifyDictionary(ReadOnlyDictionary):
         string = 'Read-and-Modify Dictionary\n'
         return ''.join([string, repr(self), '\n'])
 
+
+class ReadAddModifyDictionary(ReadModifyDictionary):
+    """Class transforms dict() keys into attributes and gives
+    read, add and modify access to dict() values using attributes
+
+    """
+
+    def __setattr__(self, name, value):
+        # print('RAM setattr')
+        if name not in self.dictionary_of_attributes.keys():
+            self._dictionary_of_attributes[name] = value
+        super().__setattr__(name, value)
+
+    def __str__(self):
+        string = 'Read-Add-Modify Dictionary\n'
+        return ''.join([string, repr(self), '\n'])
+
+
+class ReadAddModifyDeleteDictionary(ReadAddModifyDictionary):
+    """Class transforms dict() keys into attributes and gives
+    read, add and modify access to dict() values using attributes
+
+    """
+
+    def __delattr__(self, item):
+        # print('Delete attribute')
+        if item not in self._dictionary_of_attributes.keys():
+            raise AttributeError
+        del self._dictionary_of_attributes[item]
+
+    def __str__(self):
+        string = 'Read-Add-Modify-Delete Dictionary\n'
+        return ''.join([string, repr(self), '\n'])
+
