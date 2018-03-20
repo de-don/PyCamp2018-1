@@ -2,8 +2,8 @@ from copy import deepcopy
 
 
 class ReadOnlyDictionary:
-    """Class transforms dict() keys into attributes and gives access to dict()
-    values using attributes
+    """Class transforms dict() keys into attributes and gives
+    read-only access to dict() values using attributes
 
     """
 
@@ -87,6 +87,19 @@ class ReadOnlyDictionary:
             super().__setattr__(name, value)
         elif name in self.dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
+        else:
+            raise AttributeError('Attribute add if forbidden')
+
+
+class ReadModifyDictionary(ReadOnlyDictionary):
+    """Class transforms dict() keys into attributes and gives
+    read and modify access to dict() values using attributes
+
+    """
+
+    def __setattr__(self, name, value):
+        if name in self.dictionary_of_attributes.keys():
+            super().__setattr__(name, value)
         else:
             raise AttributeError('Attribute add if forbidden')
 
