@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 
-class ReadOnlyDictionary:
+class ReadOnly:
     """Class transforms dict() keys into attributes and gives
     read-only access to dict() values using attributes
 
@@ -32,7 +32,7 @@ class ReadOnlyDictionary:
         return len(self.dictionary_of_attributes)
 
     def __eq__(self, other):
-        if not isinstance(other, ReadOnlyDictionary):
+        if not isinstance(other, ReadOnly):
             return False
         else:
             return self._dictionary_of_attributes == other._dictionary_of_attributes
@@ -52,7 +52,7 @@ class ReadOnlyDictionary:
         for key, value in self._dictionary_of_attributes.items():
             # each line with name of key must have same length
             key_line = attribute_name.format(key).ljust(max_attribute_name)
-            if isinstance(value, ReadOnlyDictionary):
+            if isinstance(value, ReadOnly):
                 # split dictionary into single lines
                 dict_lines = repr(value).split('\n')
 
@@ -93,7 +93,7 @@ class ReadOnlyDictionary:
             raise AttributeError('Attribute add forbidden')
 
 
-class ReadModifyDictionary(ReadOnlyDictionary):
+class ReadModify(ReadOnly):
     """Class transforms dict() keys into attributes and gives
     read and modify access to dict() values using attributes
 
@@ -113,7 +113,7 @@ class ReadModifyDictionary(ReadOnlyDictionary):
         return ''.join([string, repr(self), '\n'])
 
 
-class ReadAddModifyDictionary(ReadModifyDictionary):
+class ReadAddModify(ReadModify):
     """Class transforms dict() keys into attributes and gives
     read, add and modify access to dict() values using attributes
 
@@ -130,7 +130,7 @@ class ReadAddModifyDictionary(ReadModifyDictionary):
         return ''.join([string, repr(self), '\n'])
 
 
-class ReadAddModifyDeleteDictionary(ReadAddModifyDictionary):
+class ReadAddModifyDelete(ReadAddModify):
     """Class transforms dict() keys into attributes and gives
     read, add and modify access to dict() values using attributes
 
@@ -144,5 +144,57 @@ class ReadAddModifyDeleteDictionary(ReadAddModifyDictionary):
 
     def __str__(self):
         string = 'Read-Add-Modify-Delete Dictionary\n'
+        return ''.join([string, repr(self), '\n'])
+
+
+class ProtectedError(Exception):
+    """Exception raises when try to set or get protected attribute of class
+
+    """
+
+
+class Protected(ReadAddModifyDelete):
+    """Class transforms dict() keys into attributes and gives
+    read, add and modify access to dict() values using attributes
+
+    """
+    def __init__(self, dictionary, *protected_attrs):
+        ReadAddModifyDelete.__init__(self, dictionary)
+
+        # for defining protected fields
+        protected_attributes = list()
+        t = type(protected_attrs)
+        for protected in protected_attrs:
+            # split with '.' one time to get highest level property from line
+            if '.' in protected[:-1]:
+                high_protected, low_protected = protected.split('.', 1)
+            else:
+                high_protected, low_protected = protected.split('.', 1)[0], None
+
+            # if low_protected attribute exist, do not protect high attribute
+            if low_protected:
+                # if value of highest protected attribute is Protected dict
+                # redefine it with low protected properties
+                if isinstance(self.dictionary_of_attributes[high_protected], Protected):
+                    self._dictionary_of_attributes[high_protected] = \
+                        Protected(dictionary[high_protected], low_protected)
+            else:
+                if high_protected in self.dictionary_of_attributes.keys():
+                    protected_attributes.append(high_protected)
+
+        self._protected_attributes = protected_attributes
+
+        # del self._dictionary_of_attributes['_protected_attributes']
+
+    @property
+    def protected_attributes(self):
+        return self._protected_attributes
+
+    def __eq__(self, other):
+        return super.__eq__(self, other) \
+               and self._protected_attributes == other._protected_attributes
+
+    def __str__(self):
+        string = 'Protected Read-Add-Modify-Delete Dictionary\n'
         return ''.join([string, repr(self), '\n'])
 

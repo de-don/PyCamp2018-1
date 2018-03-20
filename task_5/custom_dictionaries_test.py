@@ -1,8 +1,10 @@
 from unittest import TestCase
-from .custom_dictionaries import ReadOnlyDictionary as RODict
-from .custom_dictionaries import ReadModifyDictionary as RMDict
-from .custom_dictionaries import ReadAddModifyDictionary as RAMDict
-from .custom_dictionaries import ReadAddModifyDeleteDictionary as RADMDict
+from .custom_dictionaries import ProtectedError
+from .custom_dictionaries import ReadOnly as RODict
+from .custom_dictionaries import ReadModify as RMDict
+from .custom_dictionaries import ReadAddModify as RAMDict
+from .custom_dictionaries import ReadAddModifyDelete as RADMDict
+from .custom_dictionaries import Protected as PRADMDict
 
 
 class CustomDictionariesTests(TestCase):
@@ -194,5 +196,13 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(self.dict5, self.dict7)
         del self.dict8.two.five
         self.assertEqual(self.dict6, self.dict8)
+
+    def test_protected_dict(self):
+        p = PRADMDict({'one': 1, 'two': 2}, 'one')
+        print(p.protected_attributes)
+        p2 = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        print(p2.protected_attributes)
+        print(p2.two.protected_attributes)
+        print(p2.two)
 
 
