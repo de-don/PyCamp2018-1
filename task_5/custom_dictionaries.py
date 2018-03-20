@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class ReadOnlyDictionary:
     """Class transforms dict() keys into attributes and gives access to dict()
     values using attributes
@@ -10,7 +13,7 @@ class ReadOnlyDictionary:
         if not isinstance(dictionary, dict):
             raise TypeError('Input data must be Python dict()')
 
-        self._dictionary_of_attributes = dictionary
+        self._dictionary_of_attributes = deepcopy(dictionary)
 
         cls = type(self)
 
@@ -26,6 +29,12 @@ class ReadOnlyDictionary:
 
     def __len__(self):
         return len(self.dictionary_of_attributes)
+
+    def __eq__(self, other):
+        if not isinstance(other, ReadOnlyDictionary):
+            return False
+        else:
+            return self._dictionary_of_attributes == other._dictionary_of_attributes
 
     def __repr__(self):
         if not len(self):
@@ -78,13 +87,6 @@ class ReadOnlyDictionary:
             super().__setattr__(name, value)
         elif name in self.dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
-        # super().__setattr__(name, value)
         else:
             raise AttributeError('Attribute add if forbidden')
-
-
-
-
-
-
 

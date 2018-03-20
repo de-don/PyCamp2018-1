@@ -7,12 +7,17 @@ class CustomDictionariesTests(TestCase):
         self.data1 = {'one': 1, 'two': 2}
         self.dict1 = RODict(self.data1)
 
-        self.data2 = {'one': 1, 'two': {'three': 3, 'four': 4}}
+        self.data2 = {'one': 1, 'two': {'two': 2, 'four': 4}}
         self.dict2_field2 = 'two'
         self.dict2 = RODict(self.data2)
 
         self.data3 = {'one': 1, 'two': 2}
         self.dict3 = RODict(self.data3)
+
+        self.data4 = {'one': 1, 'two': 2}
+        self.dict4 = RODict(self.data3)
+
+        self.data5 = {'one': 1, 'two': {'three': 3, 'four': 4}}
 
     def test_ro_dict_init(self):
         with self.assertRaises(TypeError):
@@ -64,9 +69,24 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(len(self.data2), len(self.dict2))
 
     def test_ro_dict_print(self):
-        print(self.dict1)
-        print(self.dict2)
-        print(RODict(dict()))
+        self.assertEqual(repr(RODict(dict())), '{No attributes}')
+        self.assertEqual(
+            str(RODict(dict())),
+            'Read-Only Dictionary\n{No attributes}\n'
+        )
+        print(repr(self.dict2))
+        self.assertEqual(
+            '{\n  |one|: 1,\n  |two|: {\n           |two|: 2,'
+            '\n           |four|: 4\n         }\n}',
+            repr(self.dict2)
+        )
+
+    def test_ro_dict_getitem(self):
+        self.assertEqual(self.dict1['two'], self.data1['two'])
+        self.assertNotEqual(self.dict2['two'], self.data2['two'])
+        self.assertEqual(self.dict2['two'], RODict(self.data2['two']))
+        with self.assertRaises(IndexError):
+            print(self.dict2['four'])
 
 
 
