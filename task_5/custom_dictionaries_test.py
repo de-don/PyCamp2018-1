@@ -46,7 +46,7 @@ class CustomDictionariesTests(TestCase):
 
         # check tuple of attribute names
         self.assertEqual(
-            self.dict1.dictionary_of_attributes.keys(),
+            self.dict1.dictionary_of_attributes,
             self.data1.keys()
         )
 
@@ -93,7 +93,7 @@ class CustomDictionariesTests(TestCase):
             self.dict1.three = 3
         self.assertEqual(
             self.dict1.dictionary_of_attributes,
-            self.data1
+            self.data1.keys()
         )
         with self.assertRaises(AttributeError):
             self.dict1.one = 12
@@ -108,7 +108,7 @@ class CustomDictionariesTests(TestCase):
             self.dict3.three = 3
         self.assertEqual(
             self.dict3.dictionary_of_attributes,
-            self.data3
+            self.data3.keys()
         )
         self.dict3.one = 12
         self.assertEqual(self.dict3.one, 12)
