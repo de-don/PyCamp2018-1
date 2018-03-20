@@ -19,6 +19,7 @@ class ReadOnlyDictionary:
 
         # transform internal dictionary into ReadOnlyDictionary
         for key, value in self._dictionary_of_attributes.items():
+            t = type(self._dictionary_of_attributes[key])
             if isinstance(self._dictionary_of_attributes[key], dict):
                 self._dictionary_of_attributes[key] = cls(value)
 
@@ -83,12 +84,13 @@ class ReadOnlyDictionary:
         raise AttributeError('No such attribute')
 
     def __setattr__(self, name, value):
+        # print('RO setattr')
         if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
         elif name in self.dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
         else:
-            raise AttributeError('Attribute add if forbidden')
+            raise AttributeError('Attribute add forbidden')
 
 
 class ReadModifyDictionary(ReadOnlyDictionary):
@@ -98,8 +100,15 @@ class ReadModifyDictionary(ReadOnlyDictionary):
     """
 
     def __setattr__(self, name, value):
-        if name in self.dictionary_of_attributes.keys():
+        # print('RM setattr')
+        if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
+        elif name in self.dictionary_of_attributes.keys():
+            self._dictionary_of_attributes[name] = value
         else:
-            raise AttributeError('Attribute add if forbidden')
+            raise AttributeError('Attribute add forbidden')
+
+    def __str__(self):
+        string = 'Read-and-Modify Dictionary\n'
+        return ''.join([string, repr(self), '\n'])
 
