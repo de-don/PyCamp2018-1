@@ -27,7 +27,6 @@ class MatrixTester(TestCase):
             Matrix([[14, 19], [17, 22]]),  # 14
             Matrix([[1, 1], [1, 1]]),  # 15
             Matrix([[2, 2], [2, 2]]),  # 16
-
         ]
 
     def test_pass_number(self):

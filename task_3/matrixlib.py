@@ -163,13 +163,13 @@ class Matrix:
         # get substrings for each element
         elements = list()
         for el in self._elements:
-            elements.append([element.format(e) for e in el])
+            elements.append(element.format(e) for e in el)
         # find the longest substring
         maxstring = len(max(flatten(elements), key=len))
         # add spaces to each substring that shorter than the longest one
         # and compose them to matrix rows
-        elements = [' | '.join([e.rjust(maxstring)
-                                for e in el]) for el in elements]
+        elements = [' | '.join(e.rjust(maxstring)
+                               for e in el) for el in elements]
         return '\n'.join(elements)
 
     def __str__(self):
@@ -180,8 +180,7 @@ class Matrix:
     def __eq__(self, other):
         if isinstance(other, Matrix):
             return len(self) == len(other) and self._elements == other._elements
-        else:
-            return False
+        return False
 
     # ---------------------------------------------------------
     # Addition operation
