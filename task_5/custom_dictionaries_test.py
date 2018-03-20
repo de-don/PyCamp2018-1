@@ -46,7 +46,7 @@ class CustomDictionariesTests(TestCase):
 
         # check tuple of attribute names
         self.assertEqual(
-            self.dict1.dictionary_of_attributes,
+            self.dict1._dictionary_of_attributes.keys(),
             self.data1.keys()
         )
 
@@ -92,7 +92,7 @@ class CustomDictionariesTests(TestCase):
         with self.assertRaises(AttributeError):
             self.dict1.three = 3
         self.assertEqual(
-            self.dict1.dictionary_of_attributes,
+            self.dict1._dictionary_of_attributes.keys(),
             self.data1.keys()
         )
         with self.assertRaises(AttributeError):
@@ -107,7 +107,7 @@ class CustomDictionariesTests(TestCase):
         with self.assertRaises(AttributeError):
             self.dict3.three = 3
         self.assertEqual(
-            self.dict3.dictionary_of_attributes,
+            self.dict3._dictionary_of_attributes.keys(),
             self.data3.keys()
         )
         self.dict3.one = 12
@@ -199,10 +199,13 @@ class CustomDictionariesTests(TestCase):
 
     def test_protected_dict(self):
         p = PRADMDict({'one': 1, 'two': 2}, 'one')
-        print(p.protected_attributes)
+        print(p._protected_attributes)
         p2 = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
-        print(p2.protected_attributes)
-        print(p2.two.protected_attributes)
+        print(p2._protected_attributes)
+        print(p2.two._protected_attributes)
         print(p2.two)
+        with self.assertRaises(ProtectedError):
+            p.two = 3
+
 
 

@@ -23,13 +23,8 @@ class ReadOnly:
             if isinstance(self._dictionary_of_attributes[key], dict):
                 self._dictionary_of_attributes[key] = cls(value)
 
-    @property
-    def dictionary_of_attributes(self):
-        """Displays dictionary of attributes"""
-        return set(self._dictionary_of_attributes.keys())
-
     def __len__(self):
-        return len(self.dictionary_of_attributes)
+        return len(self._dictionary_of_attributes)
 
     def __eq__(self, other):
         if not isinstance(other, ReadOnly):
@@ -74,12 +69,12 @@ class ReadOnly:
         return ''.join([string, repr(self), '\n'])
 
     def __getitem__(self, item):
-        if item in self.dictionary_of_attributes:
+        if item in self._dictionary_of_attributes.keys():
             return self._dictionary_of_attributes[item]
         raise IndexError
 
     def __getattr__(self, item):
-        if item in self.dictionary_of_attributes:
+        if item in self._dictionary_of_attributes.keys():
             return self._dictionary_of_attributes[item]
         raise AttributeError('No such attribute')
 
@@ -87,7 +82,7 @@ class ReadOnly:
         # print('RO setattr')
         if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
-        elif name in self._dictionary_of_attributes:
+        elif name in self._dictionary_of_attributes.keys():
             raise AttributeError('Attribute is read-only')
         else:
             raise AttributeError('Attribute add forbidden')
@@ -103,7 +98,7 @@ class ReadModify(ReadOnly):
         # print('RM setattr')
         if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
-        elif name in self.dictionary_of_attributes:
+        elif name in self._dictionary_of_attributes.keys():
             self._dictionary_of_attributes[name] = value
         else:
             raise AttributeError('Attribute add forbidden')
@@ -121,7 +116,7 @@ class ReadAddModify(ReadModify):
 
     def __setattr__(self, name, value):
         # print('RAM setattr')
-        if name not in self.dictionary_of_attributes:
+        if name not in self._dictionary_of_attributes.keys():
             self._dictionary_of_attributes[name] = value
         super().__setattr__(name, value)
 
@@ -158,12 +153,12 @@ class Protected(ReadAddModifyDelete):
     read, add and modify access to dict() values using attributes
 
     """
+    # _dictionary_of_attributes = ReadAddModifyDelete._dictionary_of_attributes
+    _protected_attributes = ['_protected_attributes']
+
     def __init__(self, dictionary, *protected_attrs):
         ReadAddModifyDelete.__init__(self, dictionary)
 
-        # for defining protected fields
-        protected_attributes = list()
-        t = type(protected_attrs)
         for protected in protected_attrs:
             # split with '.' one time to get highest level property from line
             if '.' in protected[:-1]:
@@ -175,20 +170,13 @@ class Protected(ReadAddModifyDelete):
             if low_protected:
                 # if value of highest protected attribute is Protected dict
                 # redefine it with low protected properties
+                d = self._dictionary_of_attributes[high_protected]
                 if isinstance(self._dictionary_of_attributes[high_protected], Protected):
                     self._dictionary_of_attributes[high_protected] = \
                         Protected(dictionary[high_protected], low_protected)
             else:
-                if high_protected in self.dictionary_of_attributes:
-                    protected_attributes.append(high_protected)
-
-        self._protected_attributes = protected_attributes
-
-        # del self._dictionary_of_attributes['_protected_attributes']
-
-    @property
-    def protected_attributes(self):
-        return self._protected_attributes
+                if high_protected in self._dictionary_of_attributes.keys():
+                    self._protected_attributes.append(high_protected)
 
     def __eq__(self, other):
         return super.__eq__(self, other) \
@@ -197,3 +185,10 @@ class Protected(ReadAddModifyDelete):
     def __str__(self):
         string = 'Protected Read-Add-Modify-Delete Dictionary\n'
         return ''.join([string, repr(self), '\n'])
+
+    def __setattr__(self, key, value):
+        if key in self._protected_attributes:
+            # print(self.__class__)
+            raise ProtectedError(f'{key} attribute is forbidden')
+        super().__setattr__(key, value)
+
