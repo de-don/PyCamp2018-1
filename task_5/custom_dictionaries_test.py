@@ -165,6 +165,15 @@ class CustomDictionariesTests(TestCase):
             'Read-Add-Modify Dictionary\n{No attributes}\n'
         )
 
+        # ############################################
+        # ReadAddModifyDeleteDictionary
+        # ############################################
+        self.assertEqual(repr(RADMDict(dict())), '{No attributes}')
+        self.assertEqual(
+            str(RADMDict(dict())),
+            'Read-Add-Modify-Delete Dictionary\n{No attributes}\n'
+        )
+
     def test_custom_dicts_getitem(self):
         # ############################################
         # ReadOnlyDictionary
