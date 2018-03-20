@@ -12,9 +12,9 @@ class CustomDictionariesTests(TestCase):
         self.dict2 = RODict(self.data2)
 
         self.data3 = {'one': 1, 'two': 2}
-        self.dict3 = RODict(self.data1)
+        self.dict3 = RODict(self.data3)
 
-    def test_mydict_init(self):
+    def test_ro_dict_init(self):
         with self.assertRaises(TypeError):
             RODict(['one', 1, 'two', 2])
 
@@ -33,7 +33,7 @@ class CustomDictionariesTests(TestCase):
             type(self.dict2)
         )
 
-    def test_my_dict_get_attribute(self):
+    def test_ro_dict_get_attribute(self):
         self.assertEqual(
             self.dict1.one,
             self.data1['one']
@@ -45,7 +45,7 @@ class CustomDictionariesTests(TestCase):
         with self.assertRaises(AttributeError):
             a = self.dict1.three
 
-    def test_my_dict_set_attribute(self):
+    def test_ro_dict_set_attribute(self):
         with self.assertRaises(AttributeError):
             self.dict3.three = 3
         self.assertEqual(
@@ -54,10 +54,19 @@ class CustomDictionariesTests(TestCase):
         )
         with self.assertRaises(AttributeError):
             self.dict3.one = 12
+        # still can add properties, but only
+        self.dict3._dictionary_of_attributes.update(one=3)
+        # print(self.dict3.one)
+        # print(self.dict2)
 
+    def test_ro_dict_len(self):
+        self.assertEqual(len(self.data1), len(self.dict1))
+        self.assertEqual(len(self.data2), len(self.dict2))
 
-
-
+    def test_ro_dict_print(self):
+        print(self.dict1)
+        print(self.dict2)
+        print(RODict(dict()))
 
 
 
