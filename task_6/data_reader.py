@@ -3,6 +3,16 @@ from dateutil import parser
 from datetime import datetime
 
 
+def header_exist(method_to_decorate):
+    def wrapper(self, *header):
+        if all(head in self._headers for head in header):
+            print('OK')
+            return method_to_decorate(self, *header)
+        raise KeyError(f'No such header: {header}')
+    return wrapper
+
+
+
 class Data:
     """ Class to store and manipulate data from table-like sources
 
@@ -13,6 +23,10 @@ class Data:
     def __init__(self):
         self._headers = list()
         self._entries = list()
+
+    @property
+    def headers(self):
+        return self._headers
 
     def __len__(self):
         return len(self._entries)
@@ -81,6 +95,21 @@ class Data:
             entry_repr = self._entry_repr(self._entries[i])
             entries_repr.append(f'{i}:\n{entry_repr}')
         return '\n'.join(entries_repr)
+
+    def count(self):
+        """Return number of entries"""
+        return len(self)
+
+    def summa(self, field_name):
+        """Return sum of values from field_name of each entry"""
+        if field_name not in self._headers:
+            raise KeyError(f'No such field: {field_name}')
+
+        return sum(entry[field_name] for entry in self._entries)
+
+    def average(self, field_name):
+        """Return average value from field_name of each entry"""
+        return self.summa(field_name) / self.count()
 
 
 
