@@ -16,6 +16,13 @@ class DataReaderTest(TestCase):
         entries = 3
         self.assertTrue(len(d) == entries)
 
+    def test_data_entry_size(self):
+        fname = 'table.csv'
+        d = Data().get_csv(fname)
+        self.assertEqual(d.entry_size, len(d._headers))
+        d2 = Data()
+        self.assertEqual(d2.entry_size, 0)
+
     def test_data_iterable(self):
         fname = 'table.csv'
         d = Data().get_csv(fname)
@@ -89,6 +96,24 @@ class DataReaderTest(TestCase):
         self.assertEqual(len(d.unique('city')), len(d))
         with self.assertRaises(KeyError):
             d2 = d.unique('newname')
+
+    def test_data_order_by(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+        d2 = d.order_by('age')
+        self.assertEqual(len(d), len(d2))
+        self.assertNotEqual(d, d2)
+
+    def test_data_order_by_reversed(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+        d2 = d.order_by('name')
+        d3 = d.order_by('name', reversed=True)
+        self.assertEqual(len(d3), len(d2))
+        self.assertNotEqual(d3, d2)
+
+
+
 
 
 

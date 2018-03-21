@@ -1,6 +1,7 @@
 import csv
 from dateutil import parser
 from datetime import datetime
+from operator import itemgetter
 
 
 def header_exist(method_to_decorate):
@@ -137,7 +138,23 @@ class Data:
         """Return only values from header"""
         return list({value[header] for value in self._entries})
 
+    def order_by(self, header, reversed=False):
+        """Return Data object with sorted entries"""
+        if header not in self._headers:
+            raise KeyError(f'No such header: {header}')
 
+        sorted_data = Data()
+
+        sorted_entries = sorted(
+            self._entries,
+            key=itemgetter(header),
+            reverse=reversed
+        )
+
+        sorted_data._headers = self._headers
+        sorted_data._entries = sorted_entries
+
+        return sorted_data
 
 
 
