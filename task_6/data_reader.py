@@ -132,6 +132,12 @@ class Data:
 
         return from_columns
 
+    @header_exist
+    def unique(self, header):
+        """Return only values from header"""
+        return list({value[header] for value in self._entries})
+
+
 
 
 

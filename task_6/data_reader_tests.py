@@ -82,6 +82,14 @@ class DataReaderTest(TestCase):
         with self.assertRaises(KeyError):
             d3 = d.columns('newname', 'newage')
 
+    def test_data_unique_values(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+        self.assertNotEqual(len(d.unique('age')), len(d))
+        self.assertEqual(len(d.unique('city')), len(d))
+        with self.assertRaises(KeyError):
+            d2 = d.unique('newname')
+
 
 
 
