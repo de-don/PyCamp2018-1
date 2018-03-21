@@ -62,6 +62,27 @@ class DataReaderTest(TestCase):
             sum(e['age'] for e in d._entries) / d.count()
         )
 
+    def tests_data_get_new_data_from_single_column(self):
+        fname = 'table.csv'
+        d = Data().get_csv(fname)
+        d2 = d.columns('name')
+        self.assertTrue(isinstance(d2, Data))
+        self.assertEqual(d2.entry_size, 1)
+        with self.assertRaises(KeyError):
+            d3 = d.columns('newname')
+
+    def tests_data_get_new_data_from_multiple_columns(self):
+        fname = 'table.csv'
+        d = Data().get_csv(fname)
+        d2 = d.columns('name', 'age')
+        self.assertTrue(isinstance(d2, Data))
+        self.assertEqual(d2.entry_size, 2)
+        with self.assertRaises(KeyError):
+            d3 = d.columns('newname', 'name')
+        with self.assertRaises(KeyError):
+            d3 = d.columns('newname', 'newage')
+
+
 
 
 

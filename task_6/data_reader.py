@@ -6,7 +6,6 @@ from datetime import datetime
 def header_exist(method_to_decorate):
     def wrapper(self, *header):
         if all(head in self._headers for head in header):
-            print('OK')
             return method_to_decorate(self, *header)
         raise KeyError(f'No such header: {header}')
     return wrapper
@@ -27,6 +26,12 @@ class Data:
     @property
     def headers(self):
         return self._headers
+
+    @property
+    def entry_size(self):
+        if self._headers:
+            return len(self._headers)
+        return 0
 
     def __len__(self):
         return len(self._entries)
@@ -100,16 +105,33 @@ class Data:
         """Return number of entries"""
         return len(self)
 
+    @header_exist
     def summa(self, field_name):
         """Return sum of values from field_name of each entry"""
-        if field_name not in self._headers:
-            raise KeyError(f'No such field: {field_name}')
-
         return sum(entry[field_name] for entry in self._entries)
 
     def average(self, field_name):
         """Return average value from field_name of each entry"""
         return self.summa(field_name) / self.count()
+
+    @header_exist
+    def columns(self, *headers):
+        """Return new Data() with only selected columns"""
+        from_columns = Data()
+
+        entries_from_columns = [
+            {
+                key: value
+                for key, value in entry.items()
+                if key in headers
+            }
+            for entry in self._entries
+        ]
+        from_columns._headers = list(headers)
+        from_columns._entries = entries_from_columns
+
+        return from_columns
+
 
 
 
