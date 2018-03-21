@@ -1,7 +1,21 @@
 import csv
 from dateutil import parser
 from datetime import datetime
-from operator import itemgetter
+from operator import itemgetter, methodcaller, lt, le, eq, ne, ge, gt
+
+
+# dictionary of comparison operators
+COMPARISON_OPERATORS = {
+    'lt': lt,
+    'le': le,
+    'eq': eq,
+    'ne': ne,
+    'ge': ge,
+    'gt': gt
+}
+
+
+CALL_METHOD_MARK = '__'
 
 
 def header_exist(method_to_decorate):
@@ -12,13 +26,12 @@ def header_exist(method_to_decorate):
     return wrapper
 
 
-
 class Data:
     """ Class to store and manipulate data from table-like sources
 
     """
 
-    _conversion_types = [int, float, parser.parse]
+    _conversion_funcs = [int, float, parser.parse]
 
     def __init__(self):
         self._headers = list()
@@ -46,7 +59,7 @@ class Data:
     def _add_headers(self, list_of_headers):
         self._headers += list_of_headers
 
-    def _represents_some_type(self, some_type, value):
+    def _represents_type(self, some_type, value):
         try:
             some_type(value)
             return True
@@ -58,8 +71,8 @@ class Data:
         casted_entry_vals = list()
         for val in entry_values:
             # try each of probable types to cast
-            for cast_type in self._conversion_types:
-                if self._represents_some_type(cast_type, val):
+            for cast_type in self._conversion_funcs:
+                if self._represents_type(cast_type, val):
                     after_cast = cast_type(val)
                     if isinstance(after_cast, datetime):
                         after_cast = after_cast.date()
@@ -73,12 +86,14 @@ class Data:
         self._entries.append(entry)
 
     @classmethod
-    def get_csv(self, filename, delimiter=',', quotechar='|'):
-        """Get data from .csv file"""
+    def get_csv(self, filename, delimiter=','):
+        """Get data from .csv file
+
+        """
 
         data = Data()
         with open(filename, 'r') as csvfile:
-            reader = csv.reader(csvfile, delimiter=delimiter, quotechar=quotechar)
+            reader = csv.reader(csvfile, delimiter=delimiter)
             # print(reader.next())
             # get header from first row of csv
             data._add_headers(next(reader))
@@ -89,7 +104,9 @@ class Data:
         return data
 
     def _entry_repr(self, entry):
-        """Return string representation of an entry"""
+        """Return string representation of an entry
+
+        """
         entry_lines = list()
         for key, value in entry.items():
             entry_lines.append(f'   {key}: {value}')
@@ -103,21 +120,29 @@ class Data:
         return '\n'.join(entries_repr)
 
     def count(self):
-        """Return number of entries"""
+        """Return number of entries
+
+        """
         return len(self)
 
     @header_exist
     def summa(self, field_name):
-        """Return sum of values from field_name of each entry"""
+        """Return sum of values from field_name of each entry
+
+        """
         return sum(entry[field_name] for entry in self._entries)
 
     def average(self, field_name):
-        """Return average value from field_name of each entry"""
+        """Return average value from field_name of each entry
+
+        """
         return self.summa(field_name) / self.count()
 
     @header_exist
     def columns(self, *headers):
-        """Return new Data() with only selected columns"""
+        """Return new Data() with only selected columns
+
+        """
         from_columns = Data()
 
         entries_from_columns = [
@@ -135,11 +160,15 @@ class Data:
 
     @header_exist
     def unique(self, header):
-        """Return only values from header"""
+        """Return only values from header
+
+        """
         return list({value[header] for value in self._entries})
 
     def order_by(self, header, reversed=False):
-        """Return Data object with sorted entries"""
+        """Return Data object with sorted entries
+
+        """
         if header not in self._headers:
             raise KeyError(f'No such header: {header}')
 
@@ -156,18 +185,52 @@ class Data:
 
         return sorted_data
 
+    def filter(self, **filter_params):
+        """Return Data object with filtered entries
+
+        """
+        filtered_headers = self._headers
+        filtered_entries = list()
+        # dictionary of filtering methods
+        # key is name of method, value is argument
+        filter_methods = dict()
+
+        for filter_param in filter_params:
+            # if no calls of method, filter parameter is 'greater than'
+            if CALL_METHOD_MARK not in filter_param:
+                object_name = filter_param
+                # save method and value to path the method
+                filter_methods[object_name] = [
+                    # filtering method
+                    gt,
+                    # parameter of filtering method
+                    filter_params[filter_param]
+                ]
+            # if calls method, split object name and method name
+            else:
+                object_name, method_name = filter_param.split(CALL_METHOD_MARK, 1)
+                # if comparison method
+                if method_name in COMPARISON_OPERATORS:
+                    filter_methods[object_name] = [
+                        # filtering method
+                        COMPARISON_OPERATORS[method_name],
+                        # parameter of filtering method
+                        filter_params[filter_param]
+                    ]
+                else:
+                    filter_methods[object_name] = [
+                        # use callable method with passed param
+                        methodcaller(method_name, filter_param)
+                    ]
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+        # for key in filter_methods:
+        #     filtered = list(
+        #         map(
+        #             # filter parameter
+        #             filter_methods[key],
+        #             self._entries
+        #         )
+        #     )
 

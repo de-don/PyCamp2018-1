@@ -112,6 +112,12 @@ class DataReaderTest(TestCase):
         self.assertEqual(len(d3), len(d2))
         self.assertNotEqual(d3, d2)
 
+    def test_data_filter_single(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+        d.filter(name__startswith='J', age=20)
+
+
 
 
 
