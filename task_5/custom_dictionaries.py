@@ -7,6 +7,8 @@ class ReadOnly:
 
     """
 
+    _class_name = 'Read-Only Dictionary'
+
     _dictionary_of_attributes = {'_dictionary_of_attributes': 1}
 
     def __init__(self, dictionary):
@@ -19,7 +21,6 @@ class ReadOnly:
 
         # transform internal dictionary into ReadOnlyDictionary
         for key, value in self._dictionary_of_attributes.items():
-            t = type(self._dictionary_of_attributes[key])
             if isinstance(self._dictionary_of_attributes[key], dict):
                 self._dictionary_of_attributes[key] = cls(value)
 
@@ -29,8 +30,7 @@ class ReadOnly:
     def __eq__(self, other):
         if not isinstance(other, ReadOnly):
             return False
-        else:
-            return self._dictionary_of_attributes == other._dictionary_of_attributes
+        return self._dictionary_of_attributes == other._dictionary_of_attributes
 
     def __repr__(self):
         if not len(self):
@@ -41,7 +41,7 @@ class ReadOnly:
         # find longest name of attribute
         attribute_name = '  |{}|: '
         attribute_names = [str(name)
-                           for name in self._dictionary_of_attributes.keys()]
+                           for name in self._dictionary_of_attributes]
         max_attribute_name = len(max(attribute_names, key=len))
 
         for key, value in self._dictionary_of_attributes.items():
@@ -65,27 +65,25 @@ class ReadOnly:
         return '{\n' + ',\n'.join(attribute_strings) + '\n}'
 
     def __str__(self):
-        string = 'Read-Only Dictionary\n'
-        return ''.join([string, repr(self), '\n'])
+        return '\n'.join([self._class_name, repr(self)])
 
     def __getitem__(self, item):
-        if item in self._dictionary_of_attributes.keys():
+        if item in self._dictionary_of_attributes:
             return self._dictionary_of_attributes[item]
         raise IndexError
 
     def __getattr__(self, item):
-        if item in self._dictionary_of_attributes.keys():
+        if item in self._dictionary_of_attributes:
             return self._dictionary_of_attributes[item]
         raise AttributeError('No such attribute')
 
     def __setattr__(self, name, value):
         # print('RO setattr')
         if name == '_dictionary_of_attributes':
-            super().__setattr__(name, value)
-        elif name in self._dictionary_of_attributes.keys():
+            return super().__setattr__(name, value)
+        if name in self._dictionary_of_attributes:
             raise AttributeError('Attribute is read-only')
-        else:
-            raise AttributeError('Attribute add forbidden')
+        raise AttributeError('Attribute add forbidden')
 
 
 class ReadModify(ReadOnly):
@@ -94,18 +92,16 @@ class ReadModify(ReadOnly):
 
     """
 
+    _class_name = 'Read-and-Modify Dictionary'
+
     def __setattr__(self, name, value):
         # print('RM setattr')
         if name == '_dictionary_of_attributes':
             super().__setattr__(name, value)
-        elif name in self._dictionary_of_attributes.keys():
+        elif name in self._dictionary_of_attributes:
             self._dictionary_of_attributes[name] = value
         else:
             raise AttributeError('Attribute add forbidden')
-
-    def __str__(self):
-        string = 'Read-and-Modify Dictionary\n'
-        return ''.join([string, repr(self), '\n'])
 
 
 class ReadAddModify(ReadModify):
@@ -114,15 +110,13 @@ class ReadAddModify(ReadModify):
 
     """
 
+    _class_name = 'Read-Add-Modify Dictionary'
+
     def __setattr__(self, name, value):
         # print('RAM setattr')
-        if name not in self._dictionary_of_attributes.keys():
+        if name not in self._dictionary_of_attributes:
             self._dictionary_of_attributes[name] = value
         super().__setattr__(name, value)
-
-    def __str__(self):
-        string = 'Read-Add-Modify Dictionary\n'
-        return ''.join([string, repr(self), '\n'])
 
 
 class ReadAddModifyDelete(ReadAddModify):
@@ -131,15 +125,13 @@ class ReadAddModifyDelete(ReadAddModify):
 
     """
 
+    _class_name = 'Read-Add-Modify-Delete Dictionary'
+
     def __delattr__(self, item):
         # print('Delete attribute')
-        if item not in self._dictionary_of_attributes.keys():
-            raise AttributeError
+        if item not in self._dictionary_of_attributes:
+            raise AttributeError('Deleting denied')
         del self._dictionary_of_attributes[item]
-
-    def __str__(self):
-        string = 'Read-Add-Modify-Delete Dictionary\n'
-        return ''.join([string, repr(self), '\n'])
 
 
 class ProtectedError(Exception):
@@ -153,7 +145,9 @@ class Protected(ReadAddModifyDelete):
     read, add and modify access to dict() values using attributes
 
     """
-    # _dictionary_of_attributes = ReadAddModifyDelete._dictionary_of_attributes
+
+    _class_name = 'Protected Read-Add-Modify-Delete Dictionary'
+
     _protected_attributes = ['_protected_attributes']
 
     def __init__(self, dictionary, *protected_attrs):
@@ -168,7 +162,7 @@ class Protected(ReadAddModifyDelete):
             else:
                 high_protected, low_protected = protected.split('.', 1)[0], None
 
-            if high_protected not in self._dictionary_of_attributes.keys():
+            if high_protected not in self._dictionary_of_attributes:
                 raise AttributeError(
                     f'No {high_protected} attribute in {self.__name__}'
                 )
@@ -193,16 +187,12 @@ class Protected(ReadAddModifyDelete):
                         self._protected_attributes.append(high_protected)
 
             else:
-                if high_protected in self._dictionary_of_attributes.keys():
+                if high_protected in self._dictionary_of_attributes:
                     self._protected_attributes.append(high_protected)
 
     def __eq__(self, other):
-        return super.__eq__(self, other) \
+        return super().__eq__(other) \
                and self._protected_attributes == other._protected_attributes
-
-    def __str__(self):
-        string = 'Protected Read-Add-Modify-Delete Dictionary\n'
-        return ''.join([string, repr(self), '\n'])
 
     def __setattr__(self, key, value):
         if key in self._protected_attributes:

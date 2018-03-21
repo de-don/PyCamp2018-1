@@ -97,7 +97,7 @@ class CustomDictionariesTests(TestCase):
         )
         with self.assertRaises(AttributeError):
             self.dict1.one = 12
-        # WARNING!!! Still can add properties, but only through private member
+
         self.dict1._dictionary_of_attributes.update(one=3)
         self.assertEqual(self.dict1.one, 3)
 
@@ -141,7 +141,7 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(repr(RODict(dict())), '{No attributes}')
         self.assertEqual(
             str(RODict(dict())),
-            'Read-Only Dictionary\n{No attributes}\n'
+            'Read-Only Dictionary\n{No attributes}'
         )
         self.assertEqual(
             '{\n  |one|: 1,\n  |two|: {\n           |two|: 2,'
@@ -155,7 +155,7 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(repr(RMDict(dict())), '{No attributes}')
         self.assertEqual(
             str(RMDict(dict())),
-            'Read-and-Modify Dictionary\n{No attributes}\n'
+            'Read-and-Modify Dictionary\n{No attributes}'
         )
 
         # ############################################
@@ -164,7 +164,7 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(repr(RAMDict(dict())), '{No attributes}')
         self.assertEqual(
             str(RAMDict(dict())),
-            'Read-Add-Modify Dictionary\n{No attributes}\n'
+            'Read-Add-Modify Dictionary\n{No attributes}'
         )
 
         # ############################################
@@ -173,7 +173,7 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(repr(RADMDict(dict())), '{No attributes}')
         self.assertEqual(
             str(RADMDict(dict())),
-            'Read-Add-Modify-Delete Dictionary\n{No attributes}\n'
+            'Read-Add-Modify-Delete Dictionary\n{No attributes}'
         )
 
         # ############################################
@@ -182,7 +182,7 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(repr(PRADMDict(dict())), '{No attributes}')
         self.assertEqual(
             str(PRADMDict(dict())),
-            'Protected Read-Add-Modify-Delete Dictionary\n{No attributes}\n'
+            'Protected Read-Add-Modify-Delete Dictionary\n{No attributes}'
         )
 
     def test_custom_dicts_getitem(self):
