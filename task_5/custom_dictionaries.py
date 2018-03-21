@@ -159,6 +159,8 @@ class Protected(ReadAddModifyDelete):
     def __init__(self, dictionary, *protected_attrs):
         ReadAddModifyDelete.__init__(self, dictionary)
 
+        self.__dict__['_protected_attributes'] = list()
+
         for protected in protected_attrs:
             # split with '.' one time to get highest level property from line
             if '.' in protected[:-1]:
@@ -166,14 +168,30 @@ class Protected(ReadAddModifyDelete):
             else:
                 high_protected, low_protected = protected.split('.', 1)[0], None
 
-            # if low_protected attribute exist, do not protect high attribute
+            if high_protected not in self._dictionary_of_attributes.keys():
+                raise AttributeError(
+                    f'No {high_protected} attribute in {self.__name__}'
+                )
+
+            # if low_protected attribute exist, protect high attribute
+            # only if there is any nested Protected with protected attributes
             if low_protected:
                 # if value of highest protected attribute is Protected dict
                 # redefine it with low protected properties
-                d = self._dictionary_of_attributes[high_protected]
                 if isinstance(self._dictionary_of_attributes[high_protected], Protected):
-                    self._dictionary_of_attributes[high_protected] = \
-                        Protected(dictionary[high_protected], low_protected)
+                    nested_protected = Protected(dictionary[high_protected], low_protected)
+                    self._dictionary_of_attributes[high_protected] = nested_protected
+
+                    # get nested attribute from low_protected
+                    if '.' in low_protected:
+                        nested_attribute = low_protected.split('.', 1)[0]
+                    else:
+                        nested_attribute = low_protected
+
+                    # check if nested Protected has protected attributes
+                    if nested_attribute in nested_protected._protected_attributes:
+                        self._protected_attributes.append(high_protected)
+
             else:
                 if high_protected in self._dictionary_of_attributes.keys():
                     self._protected_attributes.append(high_protected)
@@ -189,6 +207,12 @@ class Protected(ReadAddModifyDelete):
     def __setattr__(self, key, value):
         if key in self._protected_attributes:
             # print(self.__class__)
-            raise ProtectedError(f'{key} attribute is forbidden')
+            raise ProtectedError(f'{key} attribute is forbidden to modify')
         super().__setattr__(key, value)
+
+    def __delattr__(self, item):
+        # print('Delete attribute')
+        if item in self._protected_attributes:
+            raise ProtectedError(f'{item} attribute is forbidden to delete')
+        del self._dictionary_of_attributes[item]
 

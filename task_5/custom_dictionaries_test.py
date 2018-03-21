@@ -176,6 +176,15 @@ class CustomDictionariesTests(TestCase):
             'Read-Add-Modify-Delete Dictionary\n{No attributes}\n'
         )
 
+        # ############################################
+        # Protected
+        # ############################################
+        self.assertEqual(repr(PRADMDict(dict())), '{No attributes}')
+        self.assertEqual(
+            str(PRADMDict(dict())),
+            'Protected Read-Add-Modify-Delete Dictionary\n{No attributes}\n'
+        )
+
     def test_custom_dicts_getitem(self):
         # ############################################
         # ReadOnlyDictionary
@@ -197,15 +206,90 @@ class CustomDictionariesTests(TestCase):
         del self.dict8.two.five
         self.assertEqual(self.dict6, self.dict8)
 
-    def test_protected_dict(self):
+    def test_protected_dict_has_protected_attribute(self):
         p = PRADMDict({'one': 1, 'two': 2}, 'one')
-        print(p._protected_attributes)
-        p2 = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
-        print(p2._protected_attributes)
-        print(p2.two._protected_attributes)
-        print(p2.two)
+        self.assertTrue('one' in p._protected_attributes)
+
+    def test_protected_dict_has_protected_attribute_case_dot(self):
+        p = PRADMDict({'one': 1, 'two': 2}, 'one.')
+        self.assertTrue('one' in p._protected_attributes)
+
+    def test_protected_dict_raises_protected_error(self):
+        p = PRADMDict({'one': 1, 'two': 2}, 'one')
         with self.assertRaises(ProtectedError):
-            p.two = 3
+            p.one = 11
+
+    def test_protected_dict_has_nested_protected_attribute(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        self.assertTrue('two' in p._protected_attributes)
+
+    def test_protected_dict_has_nested_protected_attribute_case_dot(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three.')
+        self.assertTrue('two' in p._protected_attributes)
+
+    def test_protected_dict_has_nested_with_protected_attribute(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        self.assertTrue('three' in p.two._protected_attributes)
+        self.assertFalse('three' in p._protected_attributes)
+        self.assertFalse('two' in p.two._protected_attributes)
+
+    def test_protected_dict_with_nested_raises_protected_error_on_top_level(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        with self.assertRaises(ProtectedError):
+            p.two = 23
+
+    def test_protected_dict_with_nested_raises_protected_error_on_low_level(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        with self.assertRaises(ProtectedError):
+            p.two.three = 23
+
+    def test_protected_dict_with_nested_raises_attribute_error_on_top_level(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        with self.assertRaises(ProtectedError):
+            p.two = 23
+
+    def test_protected_dict_with_nested_raises_attribute_error_on_low_level(self):
+        with self.assertRaises(AttributeError):
+            _ = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}},
+                          'shark')
+
+    def test_protected_dict_with_nested_raises_attribute_error_on_nested_level(self):
+        with self.assertRaises(AttributeError):
+            _ = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}},
+                          'two.shark')
+
+    def test_equality_of_protected(self):
+        p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
+        p2 = PRADMDict({'one': 1, 'two': 2}, 'one')
+        self.assertTrue(p1 == p2)
+        p3 = PRADMDict({'one': 1, 'two': 2}, 'two')
+        self.assertFalse(p1 == p3)
+
+    def test_prtected_dict_delete_top_level(self):
+        p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
+        del p1.two
+        p2 = PRADMDict({'one': 1}, 'one')
+        self.assertTrue(p1 == p2)
+
+    def test_prtected_dict_delete_top_level_raises_protected_error(self):
+        p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
+        with self.assertRaises(ProtectedError):
+            del p1.one
+
+    def test_prtected_dict_delete_nested_level(self):
+        p1 = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'one')
+        del p1.two.three
+        p2 = PRADMDict({'one': 1, 'two': {'four': 4}}, 'one')
+        self.assertTrue(p1 == p2)
+
+    def test_prtected_dict_delete_nested_level_raises_protected_error(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        with self.assertRaises(ProtectedError):
+            del p.two.three
+        with self.assertRaises(ProtectedError):
+            del p.two
+
+
 
 
 
