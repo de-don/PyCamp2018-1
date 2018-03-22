@@ -63,7 +63,6 @@ class DataReaderTest(TestCase):
     def test_data_average(self):
         fname = 'table.csv'
         d = Data().get_csv(fname)
-        print(d.average('age'))
         self.assertEqual(
             d.average('age'),
             sum(e['age'] for e in d._entries) / d.count()
@@ -116,6 +115,11 @@ class DataReaderTest(TestCase):
         fname = 'table2.csv'
         d = Data().get_csv(fname)
         d.filter(name__startswith='J', age=20)
+
+    def test_simple_filter(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+        d.simple_filter(age=18)
 
 
 

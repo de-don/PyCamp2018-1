@@ -185,6 +185,17 @@ class Data:
 
         return sorted_data
 
+    def simple_filter(self, **filter_params):
+        """Return Data object """
+        filtered_data = Data()
+
+        for filter_param, filter_value in filter_params.items():
+            for entry in self._entries:
+                if entry[filter_param] == filter_value:
+                    print(entry)
+
+
+
     def filter(self, **filter_params):
         """Return Data object with filtered entries
 
