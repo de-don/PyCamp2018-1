@@ -1,4 +1,5 @@
 import csv
+import abc
 import json
 from dateutil import parser
 from datetime import datetime
@@ -18,6 +19,76 @@ COMPARISON_OPERATORS = {
 
 
 CALL_METHOD_MARK = '__'
+
+
+class FileExtensionError(Exception):
+    """Raises when try to read data from unsupported file type"""
+
+
+class AbstractDataProvider(abc.ABC):
+    """Class to read data from some source
+
+    """
+
+
+
+class DataProvider:
+    """Class to read data from different
+
+    """
+
+    def _csv_reader(self, filename, delimiter):
+        """Get data from .csv file
+
+        """
+
+        with open(filename, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter=delimiter)
+            # print(reader.next())
+            # get header from first row of csv
+            csv_headers = next(reader)
+
+            # get entries from csv
+            csv_entries = list()
+            for row in reader:
+                csv_entries.append(row)
+
+        return csv_headers, csv_entries
+
+    @classmethod
+    def read_data(self, file_name, file_type, **kwargs):
+        """Read data from file of supported type
+
+        """
+
+        _supported_sources = {
+            'csv': self._csv_reader
+        }
+
+        if file_type not in _supported_sources:
+            raise FileExtensionError(
+                f'No support of reading data from .{file_type} files'
+            )
+
+        return _supported_sources[file_type](file_name)
+
+    @classmethod
+    def write_data(self, file_name, file_type, **kwargs):
+        """Read data to file of supported type
+
+        """
+
+        _supported_receivers = {
+
+        }
+
+        if file_type not in _supported_receivers:
+            raise FileExtensionError(
+                f'No support of reading data from .{file_type} files'
+            )
+
+        return _supported_receivers[file_type](file_name)
+
 
 
 def header_exist(method_to_decorate):
