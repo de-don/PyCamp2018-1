@@ -1,4 +1,5 @@
 import csv
+import json
 from dateutil import parser
 from datetime import datetime
 from itertools import compress
@@ -20,6 +21,9 @@ CALL_METHOD_MARK = '__'
 
 
 def header_exist(method_to_decorate):
+    """Check that header exists in data
+
+    """
     def wrapper(self, *header):
         if all(head in self._headers for head in header):
             return method_to_decorate(self, *header)
@@ -32,11 +36,54 @@ class Data:
 
     """
 
+    # functions used for conversion from string into some type
     _conversion_funcs = [int, float, parser.parse]
 
     def __init__(self, headers=None, entries=None):
         self._headers = headers
         self._entries = entries
+
+    def _entry_repr(self, entry):
+        """Return string representation of an entry
+
+        """
+        entry_lines = list()
+        for key, value in entry.items():
+            entry_lines.append(f'   {key}: {value}')
+        return '\n'.join(entry_lines)
+
+    def _represents_type(self, some_type, value):
+        """Check if value can be casted into some type"""
+        try:
+            some_type(value)
+            return True
+        except ValueError:
+            return False
+
+    def _get_entry(self, headers, entry_values):
+        """Convert string of entry values into entry, represented as dict.
+
+        Can convert string into supported types
+
+        """
+        # convert types of values
+        casted_entry_vals = list()
+        for val in entry_values:
+            # try each of probable types to cast
+            for cast_type in self._conversion_funcs:
+                if self._represents_type(cast_type, val):
+                    after_cast = cast_type(val)
+                    if isinstance(after_cast, datetime):
+                        after_cast = after_cast.date()
+                    casted_entry_vals.append(after_cast)
+                    break
+            # or do not cast and save as sting
+            else:
+                casted_entry_vals.append(val)
+
+        entry = dict(zip(headers, casted_entry_vals))
+        # self._entries.append(entry)
+        return entry
 
     @property
     def headers(self):
@@ -62,47 +109,26 @@ class Data:
     def __iter__(self):
         return iter(self._entries)
 
-    def copy(self):
-        return Data(self._headers, self._entries)
+    def __repr__(self):
+        entries_repr = list()
+        if not len(self):
+            return 'Data()'
+        for i in range(len(self)):
+            entry_repr = self._entry_repr(self._entries[i])
+            entries_repr.append(f'{i}:\n{entry_repr}')
+        return '\n'.join(entries_repr)
 
-    def _represents_type(self, some_type, value):
-        try:
-            some_type(value)
-            return True
-        except ValueError:
-            return False
-
-    def _get_entry(self, headers, entry_values):
-        # convert types of values
-        casted_entry_vals = list()
-        for val in entry_values:
-            # try each of probable types to cast
-            for cast_type in self._conversion_funcs:
-                if self._represents_type(cast_type, val):
-                    after_cast = cast_type(val)
-                    if isinstance(after_cast, datetime):
-                        after_cast = after_cast.date()
-                    casted_entry_vals.append(after_cast)
-                    break
-            # or do not cast and save as sting
-            else:
-                casted_entry_vals.append(val)
-
-        entry = dict(zip(headers, casted_entry_vals))
-        # self._entries.append(entry)
-        return entry
+    #
 
     @classmethod
     def get_csv(self, filename, delimiter=','):
         """Get data from .csv file
 
         """
-
-        # csv_headers = list()
         csv_entries = list()
 
-        with open(filename, 'r') as csvfile:
-            reader = csv.reader(csvfile, delimiter=delimiter)
+        with open(filename, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter=delimiter)
             # print(reader.next())
             # get header from first row of csv
             csv_headers = next(reader)
@@ -113,23 +139,57 @@ class Data:
 
         return Data(csv_headers, csv_entries)
 
-    def _entry_repr(self, entry):
-        """Return string representation of an entry
+    @classmethod
+    def get_json(self, filename):
+        """Get data from json file
 
         """
-        entry_lines = list()
-        for key, value in entry.items():
-            entry_lines.append(f'   {key}: {value}')
-        return '\n'.join(entry_lines)
+        with open(filename, 'r') as json_out:
+            data = json.load(json_out)
+            # get headers
+            json_headers = list(data.keys())
+            # list of lists for aggregating entry values
+            json_entries_strings = list(zip(*list(data.values())))
+            json_entries = list()
+            for entry_string in json_entries_strings:
+                json_entries.append(self()._get_entry(
+                    json_headers, entry_string
+                ))
 
-    def __repr__(self):
-        entries_repr = list()
-        if not len(self):
-            return 'Data()'
-        for i in range(len(self)):
-            entry_repr = self._entry_repr(self._entries[i])
-            entries_repr.append(f'{i}:\n{entry_repr}')
-        return '\n'.join(entries_repr)
+            return Data(json_headers, json_entries)
+
+    def print_csv(self, filename, delimiter=','):
+        """Write Data into csv file
+
+        """
+        with open(filename, 'w') as csv_file:
+            entry_writer = csv.writer(csv_file, delimiter=delimiter)
+
+            # write headers
+            entry_writer.writerow(self._headers)
+
+            for entry in self._entries:
+                # build string of entry values
+                entry_string_values = [
+                    str(entry[header]) for header in self._headers
+                ]
+                entry_writer.writerow(entry_string_values)
+
+    def print_json(self, filename):
+        """Write Data into json file
+
+        """
+        with open(filename, 'w') as json_out:
+            entry_strings = {header: list() for header in self._headers}
+
+            for entry in self._entries:
+                for entry_key, entry_value in entry.items():
+                    entry_strings[entry_key].append(str(entry_value))
+
+            json.dump(entry_strings, json_out)
+
+    def copy(self):
+        return Data(self._headers, self._entries)
 
     def count(self):
         """Return number of entries
@@ -143,12 +203,6 @@ class Data:
 
         """
         return sum(entry[field_name] for entry in self._entries)
-
-    def average(self, field_name):
-        """Return average value from field_name of each entry
-
-        """
-        return self.summa(field_name) / self.count()
 
     @header_exist
     def columns(self, *headers):
@@ -177,6 +231,12 @@ class Data:
         """
         return list({value[header] for value in self._entries})
 
+    def average(self, field_name):
+        """Return average value from field_name of each entry
+
+        """
+        return self.summa(field_name) / self.count()
+
     def order_by(self, header, reversed=False):
         """Return Data object with sorted entries
 
@@ -196,22 +256,6 @@ class Data:
         sorted_data._entries = sorted_entries
 
         return sorted_data
-
-    # def simple_filter(self, **filter_params):
-    #     """Return Data object """
-    #     filtered_data = self.copy()
-    #
-    #     filter_results = [True for _ in self._entries]
-    #
-    #     for filter_param, filter_value in filter_params.items():
-    #         res = [entry[filter_param] == filter_value
-    #                for entry in self._entries]
-    #
-    #         filter_results = list(map(lambda x, y: x & y, filter_results, res))
-    #
-    #     filtered_data._entries = list(compress(self._entries, filter_results))
-    #
-    #     return filtered_data
 
     def filtered(self, **filter_params):
         """Return Data object with filtered entries
