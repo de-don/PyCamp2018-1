@@ -95,11 +95,6 @@ class Data:
             return len(self._headers)
         return 0
 
-    def __eq__(self, other):
-        if not isinstance(other, Data):
-            raise TypeError('Cannot compare Data with other types')
-        return self._entries == other._entries
-
     def __len__(self):
         return len(self._entries)
 
@@ -187,6 +182,9 @@ class Data:
                     entry_strings[entry_key].append(str(entry_value))
 
             json.dump(entry_strings, json_out)
+
+    def print_html_table(self, filename):
+        return
 
     def copy(self):
         return Data(self._headers, self._entries)

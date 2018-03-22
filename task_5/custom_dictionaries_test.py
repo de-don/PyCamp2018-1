@@ -77,8 +77,8 @@ class CustomDictionariesTests(TestCase):
         with self.assertRaises(AttributeError):
             a = self.dict1.three
         self.assertEqual(
-            self.dict2.two,
-            RODict(self.data2['two'])
+            repr(self.dict2.two),
+            repr(RODict(self.data2['two']))
         )
         self.assertEqual(
             self.dict2.two.two,
@@ -192,7 +192,10 @@ class CustomDictionariesTests(TestCase):
         self.assertEqual(self.dict1['two'], self.data1['two'])
         self.assertNotEqual(self.dict2['two'], self.data2['two'])
         self.assertNotEqual(self.dict2['two'], self.data2['two'])
-        self.assertEqual(self.dict2['two'], RODict(self.data2['two']))
+        self.assertEqual(
+            repr(self.dict2['two']),
+            repr(RODict(self.data2['two']))
+        )
         with self.assertRaises(IndexError):
             print(self.dict2['four'])
 
@@ -202,9 +205,12 @@ class CustomDictionariesTests(TestCase):
         with self.assertRaises(AttributeError):
             del self.dict8.two.error
         del self.dict7.three
-        self.assertEqual(self.dict5, self.dict7)
+        self.assertEqual(repr(self.dict5), repr(self.dict7))
         del self.dict8.two.five
-        self.assertEqual(self.dict6, self.dict8)
+        self.assertEqual(
+            repr(self.dict6),
+            repr(self.dict8)
+        )
 
     def test_protected_dict_has_protected_attribute(self):
         p = PRADMDict({'one': 1, 'two': 2}, 'one')
@@ -258,18 +264,11 @@ class CustomDictionariesTests(TestCase):
             _ = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}},
                           'two.shark')
 
-    def test_equality_of_protected(self):
-        p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
-        p2 = PRADMDict({'one': 1, 'two': 2}, 'one')
-        self.assertTrue(p1 == p2)
-        p3 = PRADMDict({'one': 1, 'two': 2}, 'two')
-        self.assertFalse(p1 == p3)
-
     def test_prtected_dict_delete_top_level(self):
         p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
         del p1.two
         p2 = PRADMDict({'one': 1}, 'one')
-        self.assertTrue(p1 == p2)
+        self.assertEqual(repr(p1), repr(p2))
 
     def test_prtected_dict_delete_top_level_raises_protected_error(self):
         p1 = PRADMDict({'one': 1, 'two': 2}, 'one')
@@ -280,7 +279,7 @@ class CustomDictionariesTests(TestCase):
         p1 = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'one')
         del p1.two.three
         p2 = PRADMDict({'one': 1, 'two': {'four': 4}}, 'one')
-        self.assertTrue(p1 == p2)
+        self.assertEqual(repr(p1), repr(p2))
 
     def test_prtected_dict_delete_nested_level_raises_protected_error(self):
         p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')

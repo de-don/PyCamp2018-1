@@ -27,11 +27,6 @@ class ReadOnly:
     def __len__(self):
         return len(self._dictionary_of_attributes)
 
-    def __eq__(self, other):
-        if not isinstance(other, ReadOnly):
-            return False
-        return self._dictionary_of_attributes == other._dictionary_of_attributes
-
     def __repr__(self):
         if not len(self):
             return '{No attributes}'
@@ -189,10 +184,6 @@ class Protected(ReadAddModifyDelete):
             else:
                 if high_protected in self._dictionary_of_attributes:
                     self._protected_attributes.append(high_protected)
-
-    def __eq__(self, other):
-        return super().__eq__(other) \
-               and self._protected_attributes == other._protected_attributes
 
     def __setattr__(self, key, value):
         if key in self._protected_attributes:

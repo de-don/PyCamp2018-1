@@ -106,7 +106,7 @@ class DataReaderTest(TestCase):
         d = Data().get_csv(fname)
         d2 = d.order_by('age')
         self.assertEqual(len(d), len(d2))
-        self.assertNotEqual(d, d2)
+        self.assertNotEqual(repr(d), repr(d2))
 
     def test_data_order_by_reversed(self):
         fname = input_folder / 'table2.csv'
@@ -114,7 +114,7 @@ class DataReaderTest(TestCase):
         d2 = d.order_by('name')
         d3 = d.order_by('name', reversed=True)
         self.assertEqual(len(d3), len(d2))
-        self.assertNotEqual(d3, d2)
+        self.assertNotEqual(repr(d3), repr(d2))
 
     def test_data_order_by_raises_keyerror(self):
         fname = input_folder / 'table2.csv'
@@ -133,13 +133,13 @@ class DataReaderTest(TestCase):
                 {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk'}
             ]
         )
-        self.assertEqual(d, d2)
+        self.assertEqual(repr(d), repr(d2))
 
     def test_data_copy(self):
         fname = input_folder / 'table2.csv'
         d = Data().get_csv(fname)
         d2 = d.copy()
-        self.assertTrue(d == d2)
+        self.assertEqual(repr(d), repr(d2))
         self.assertFalse(id(d) == id(d2))
 
     headers = ['name', 'age', 'city', 'birthday']
@@ -168,7 +168,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(1999, 10, 11)}
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_several_equal_filters(self):
         fname = input_folder / 'table2.csv'
@@ -182,7 +182,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(1999, 10, 11)}
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_single_comparison_filter(self):
         fname = input_folder / 'table2.csv'
@@ -198,7 +198,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(1971, 10, 20)},
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_empty_result(self):
         fname = input_folder / 'table2.csv'
@@ -209,7 +209,7 @@ class DataReaderTest(TestCase):
             ['name', 'age', 'city', 'birthday'],
             []
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_several_comparison_filters(self):
         fname = input_folder / 'table2.csv'
@@ -228,7 +228,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(1999, 10, 11)}
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_comparison_filter_and_method_filter(self):
         fname = input_folder / 'table2.csv'
@@ -242,7 +242,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(2000, 1, 11)},
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_filtered_several_method_filters(self):
         fname = input_folder / 'table2.csv'
@@ -256,7 +256,7 @@ class DataReaderTest(TestCase):
                  'birthday': date(1986, 10, 10)},
             ]
         )
-        self.assertEqual(d2, d3)
+        self.assertEqual(repr(d2), repr(d3))
 
     def test_data_read_csv_print_to_csv(self):
         read = input_folder / 'table2.csv'
@@ -264,7 +264,7 @@ class DataReaderTest(TestCase):
         write = output_folder / 'write.csv'
         d.print_csv(write)
         d2 = Data().get_csv(write)
-        self.assertEqual(d, d2)
+        self.assertEqual(repr(d), repr(d2))
 
     def test_data_read_csv_print_to_json(self):
         read = input_folder / 'table2.csv'
@@ -272,7 +272,7 @@ class DataReaderTest(TestCase):
         write = output_folder / 'write.json'
         d.print_json(write)
         d2 = Data().get_json(write)
-        self.assertEqual(d, d2)
+        self.assertEqual(repr(d), repr(d2))
 
     def test_data_read_json_print_to_csv(self):
         read = input_folder / 'read.json'
@@ -280,16 +280,15 @@ class DataReaderTest(TestCase):
         write = output_folder / 'write.csv'
         d.print_csv(write)
         d2 = Data().get_csv(write)
-        self.assertEqual(d, d2)
+        self.assertEqual(repr(d), repr(d2))
 
     def test_data_read_json_print_to_json(self):
         read = input_folder / 'read.json'
         d = Data().get_json(read)
-        print(d)
         write = output_folder / 'write.json'
         d.print_json(write)
         d2 = Data().get_json(write)
-        self.assertEqual(d, d2)
+        self.assertEqual(repr(d), repr(d2))
 
 
 
