@@ -1,6 +1,7 @@
 import csv
 from dateutil import parser
 from datetime import datetime
+from itertools import compress
 from operator import itemgetter, methodcaller, lt, le, eq, ne, ge, gt
 
 
@@ -33,9 +34,9 @@ class Data:
 
     _conversion_funcs = [int, float, parser.parse]
 
-    def __init__(self):
-        self._headers = list()
-        self._entries = list()
+    def __init__(self, headers=None, entries=None):
+        self._headers = headers
+        self._entries = entries
 
     @property
     def headers(self):
@@ -47,6 +48,11 @@ class Data:
             return len(self._headers)
         return 0
 
+    def __eq__(self, other):
+        if not isinstance(other, Data):
+            raise TypeError('Cannot compare Data with other types')
+        return self._entries == other._entries
+
     def __len__(self):
         return len(self._entries)
 
@@ -56,8 +62,8 @@ class Data:
     def __iter__(self):
         return iter(self._entries)
 
-    def _add_headers(self, list_of_headers):
-        self._headers += list_of_headers
+    def copy(self):
+        return Data(self._headers, self._entries)
 
     def _represents_type(self, some_type, value):
         try:
@@ -66,7 +72,7 @@ class Data:
         except ValueError:
             return False
 
-    def _add_entry(self, entry_values):
+    def _get_entry(self, headers, entry_values):
         # convert types of values
         casted_entry_vals = list()
         for val in entry_values:
@@ -82,8 +88,9 @@ class Data:
             else:
                 casted_entry_vals.append(val)
 
-        entry = dict(zip(self._headers, casted_entry_vals))
-        self._entries.append(entry)
+        entry = dict(zip(headers, casted_entry_vals))
+        # self._entries.append(entry)
+        return entry
 
     @classmethod
     def get_csv(self, filename, delimiter=','):
@@ -91,17 +98,20 @@ class Data:
 
         """
 
-        data = Data()
+        # csv_headers = list()
+        csv_entries = list()
+
         with open(filename, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=delimiter)
             # print(reader.next())
             # get header from first row of csv
-            data._add_headers(next(reader))
+            csv_headers = next(reader)
 
             # get entries from csv
             for row in reader:
-                data._add_entry(row)
-        return data
+                csv_entries.append(self()._get_entry(csv_headers, row))
+
+        return Data(csv_headers, csv_entries)
 
     def _entry_repr(self, entry):
         """Return string representation of an entry
@@ -114,6 +124,8 @@ class Data:
 
     def __repr__(self):
         entries_repr = list()
+        if not len(self):
+            return 'Data()'
         for i in range(len(self)):
             entry_repr = self._entry_repr(self._entries[i])
             entries_repr.append(f'{i}:\n{entry_repr}')
@@ -185,63 +197,55 @@ class Data:
 
         return sorted_data
 
-    def simple_filter(self, **filter_params):
-        """Return Data object """
-        filtered_data = Data()
+    # def simple_filter(self, **filter_params):
+    #     """Return Data object """
+    #     filtered_data = self.copy()
+    #
+    #     filter_results = [True for _ in self._entries]
+    #
+    #     for filter_param, filter_value in filter_params.items():
+    #         res = [entry[filter_param] == filter_value
+    #                for entry in self._entries]
+    #
+    #         filter_results = list(map(lambda x, y: x & y, filter_results, res))
+    #
+    #     filtered_data._entries = list(compress(self._entries, filter_results))
+    #
+    #     return filtered_data
 
-        for filter_param, filter_value in filter_params.items():
-            for entry in self._entries:
-                if entry[filter_param] == filter_value:
-                    print(entry)
-
-
-
-    def filter(self, **filter_params):
+    def filtered(self, **filter_params):
         """Return Data object with filtered entries
 
         """
-        filtered_headers = self._headers
-        filtered_entries = list()
-        # dictionary of filtering methods
-        # key is name of method, value is argument
-        filter_methods = dict()
+        filtered_data = self.copy()
 
-        for filter_param in filter_params:
+        filter_results = [True for _ in self._entries]
+
+        for filter_param, filter_value in filter_params.items():
             # if no calls of method, filter parameter is 'greater than'
             if CALL_METHOD_MARK not in filter_param:
-                object_name = filter_param
-                # save method and value to path the method
-                filter_methods[object_name] = [
-                    # filtering method
-                    gt,
-                    # parameter of filtering method
-                    filter_params[filter_param]
-                ]
-            # if calls method, split object name and method name
+
+                res = [entry[filter_param] == filter_value for entry in
+                       self._entries]
             else:
+                # split into field name of entry and name of function
                 object_name, method_name = filter_param.split(CALL_METHOD_MARK, 1)
                 # if comparison method
                 if method_name in COMPARISON_OPERATORS:
-                    filter_methods[object_name] = [
-                        # filtering method
-                        COMPARISON_OPERATORS[method_name],
-                        # parameter of filtering method
-                        filter_params[filter_param]
-                    ]
+                    operation = COMPARISON_OPERATORS[method_name]
+                    res = [operation(entry[object_name], filter_value)
+                           for entry in self._entries]
+
                 else:
-                    filter_methods[object_name] = [
-                        # use callable method with passed param
-                        methodcaller(method_name, filter_param)
-                    ]
+                    # use callable method with passed param
+                    operation = methodcaller(method_name, filter_value)
+                    res = [operation(entry[object_name])
+                           for entry in self._entries]
 
+            filter_results = list(
+                map(lambda x, y: x & y, filter_results, res))
 
+        filtered_data._entries = list(compress(self._entries, filter_results))
 
-        # for key in filter_methods:
-        #     filtered = list(
-        #         map(
-        #             # filter parameter
-        #             filter_methods[key],
-        #             self._entries
-        #         )
-        #     )
+        return filtered_data
 

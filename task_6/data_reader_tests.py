@@ -30,7 +30,7 @@ class DataReaderTest(TestCase):
             self.assertTrue(isinstance(entry, dict))
 
     def test_type_cast(self):
-        fname = 'table.csv'
+        fname = 'table2.csv'
         d = Data().get_csv(fname)
         headers = d._headers
         entry = d[0]
@@ -111,15 +111,154 @@ class DataReaderTest(TestCase):
         self.assertEqual(len(d3), len(d2))
         self.assertNotEqual(d3, d2)
 
-    def test_data_filter_single(self):
+    def test_data_order_by_raises_keyerror(self):
         fname = 'table2.csv'
         d = Data().get_csv(fname)
-        d.filter(name__startswith='J', age=20)
+        with self.assertRaises(KeyError):
+            d2 = d.order_by('country', reversed=True)
 
-    def test_simple_filter(self):
+    def test_data_equality(self):
+        fname = 'table.csv'
+        d = Data().get_csv(fname)
+        d2 = Data(
+            ['name', 'age', 'city'],
+            [
+                {'name': 'John', 'age': 32, 'city': 'NY'},
+                {'name': 'Sam', 'age': 18, 'city': 'LA'},
+                {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk'}
+            ]
+        )
+        self.assertEqual(d, d2)
+
+    def test_data_copy(self):
         fname = 'table2.csv'
         d = Data().get_csv(fname)
-        d.simple_filter(age=18)
+        d2 = d.copy()
+        self.assertTrue(d == d2)
+        self.assertFalse(id(d) == id(d2))
+
+    headers = ['name', 'age', 'city', 'birthday']
+    entries = [
+        {'name': 'John', 'age': 32, 'city': 'NY',
+         'birthday': date(1986, 10, 10)},
+        {'name': 'Sam', 'age': 18, 'city': 'LA',
+         'birthday': date(2000, 1, 11)},
+        {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+         'birthday': date(1971, 10, 20)},
+        {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+         'birthday': date(1999, 10, 11)}
+    ]
+
+    def test_data_filtered_single_equal_filter(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age=18)
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'Sam', 'age': 18, 'city': 'LA',
+                 'birthday': date(2000, 1, 11)},
+                {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+                 'birthday': date(1999, 10, 11)}
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_several_equal_filters(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age=18, name='John')
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+                 'birthday': date(1999, 10, 11)}
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_single_comparison_filter(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age__gt=18)
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'John', 'age': 32, 'city': 'NY',
+                 'birthday': date(1986, 10, 10)},
+                {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+                 'birthday': date(1971, 10, 20)},
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_empty_result(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age__lt=18)
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            []
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_several_comparison_filters(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age__ge=18,
+                                  birthday__gt=date(1980, 1, 1))
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'John', 'age': 32, 'city': 'NY',
+                 'birthday': date(1986, 10, 10)},
+                {'name': 'Sam', 'age': 18, 'city': 'LA',
+                 'birthday': date(2000, 1, 11)},
+                {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+                 'birthday': date(1999, 10, 11)}
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_comparison_filter_and_method_filter(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(age__ge=18,
+                                  name__startswith='S')
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'Sam', 'age': 18, 'city': 'LA',
+                 'birthday': date(2000, 1, 11)},
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+    def test_data_filtered_several_method_filters(self):
+        fname = 'table2.csv'
+        d = Data().get_csv(fname)
+
+        d2 = d.filtered(city__startswith='N',
+                                  name__startswith='J')
+        d3 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'John', 'age': 32, 'city': 'NY',
+                 'birthday': date(1986, 10, 10)},
+            ]
+        )
+        self.assertEqual(d2, d3)
+
+
+
+
+
 
 
 
