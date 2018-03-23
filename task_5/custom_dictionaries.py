@@ -62,14 +62,9 @@ class ReadOnly:
     def __str__(self):
         return '\n'.join([self._class_name, repr(self)])
 
-    def __getitem__(self, item):
-        if item in self._dictionary_of_attributes:
-            return self._dictionary_of_attributes[item]
-        raise IndexError
-
-    def __getattr__(self, item):
-        if item in self._dictionary_of_attributes:
-            return self._dictionary_of_attributes[item]
+    def __getattr__(self, name):
+        if name in self._dictionary_of_attributes:
+            return self._dictionary_of_attributes[name]
         raise AttributeError('No such attribute')
 
     def __setattr__(self, name, value):
@@ -79,6 +74,15 @@ class ReadOnly:
         if name in self._dictionary_of_attributes:
             raise AttributeError('Attribute is read-only')
         raise AttributeError('Attribute add forbidden')
+
+    def __getitem__(self, name):
+        return self.__getattr__(name)
+
+    def __setitem__(self, name, value):
+        return self.__setattr__(name, value)
+
+    def __delitem__(self, name):
+        return self.__getattr__(name)
 
 
 class ReadModify(ReadOnly):

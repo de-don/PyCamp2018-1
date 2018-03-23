@@ -196,7 +196,7 @@ class CustomDictionariesTests(TestCase):
             repr(self.dict2['two']),
             repr(RODict(self.data2['two']))
         )
-        with self.assertRaises(IndexError):
+        with self.assertRaises(AttributeError):
             print(self.dict2['four'])
 
     def test_radmd_dict_delitem(self):
@@ -287,6 +287,15 @@ class CustomDictionariesTests(TestCase):
             del p.two.three
         with self.assertRaises(ProtectedError):
             del p.two
+
+    def test_protected_dict_get_attribute_through_getitem(self):
+        p = PRADMDict({'one': 1, 'two': {'three': 3, 'four': 4}}, 'two.three')
+        self.assertEqual(p.one, p['one'])
+
+    def read_only_dict_set_attribute_through_setitem(self):
+        p = RODict({'one': 1, 'two': {'three': 3, 'four': 4}})
+        with self.assertRaises(AttributeError):
+            p['one'] = 123
 
 
 
