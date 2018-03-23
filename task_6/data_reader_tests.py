@@ -1,5 +1,5 @@
 from unittest import TestCase
-from .data_reader import Data, CSVDataProvider, JSONDataProvider
+from .data_reader import Data, CSVDataProvider, JSONDataProvider, add_filter
 from datetime import datetime, date
 from pathlib import Path
 
@@ -409,6 +409,37 @@ class DataReaderTest(TestCase):
         d2 = Data().load_from_file(JSONDataProvider(), write)
         self.assertEqual(repr(d), repr(d2))
 
+    def test_data_filter_with_custom_filter(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 40, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 20, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+
+        @add_filter
+        def contains_zero(value, include):
+            result = '0' in str(value)
+            return result if include else not result
+
+        d = Data(headers, entries)
+        d2 = Data(
+            ['name', 'age', 'city', 'birthday'],
+            [
+                {'name': 'Igor', 'age': 40, 'city': 'Krasnoyarsk',
+                 'birthday': date(1971, 10, 20)},
+                {'name': 'John', 'age': 20, 'city': 'Los Angeles',
+                 'birthday': date(1999, 10, 11)}
+            ]
+        )
+
+        d3 = d.filtered(age__contains_zero=True)
+        self.assertEqual(repr(d2), repr(d3))
 
 
 

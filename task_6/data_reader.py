@@ -8,7 +8,7 @@ from operator import itemgetter, methodcaller, lt, le, eq, ne, ge, gt
 
 
 # dictionary of comparison operators
-COMPARISON_OPERATORS = {
+SUPPORTED_FUNCTIONS = {
     'lt': lt,
     'le': le,
     'eq': eq,
@@ -189,6 +189,19 @@ def header_exist(method_to_decorate):
     return wrapper
 
 
+def add_filter(filter_to_decorate):
+    """Adds custom filter to SUPPORTED_FUNCTIONS dict
+
+    """
+    # add filter_to_decorate to supported functions
+    SUPPORTED_FUNCTIONS[filter_to_decorate.__name__] = filter_to_decorate
+
+    def wrapper(value, condition):
+        return filter_to_decorate(value, condition)
+
+    return wrapper
+
+
 class Data:
     """ Class to store and manipulate data from table-like sources
 
@@ -271,7 +284,9 @@ class Data:
             entries_repr.append(f'{i}:\n{entry_repr}')
         return '\n'.join(entries_repr)
 
-    #
+    # ##########################################################################
+    # Old methods to work with data sources
+    # ##########################################################################
 
     @classmethod
     def get_csv(self, filename, delimiter=','):
@@ -355,6 +370,8 @@ class Data:
         Args:
             data_provider: loads data from some source.
                 Must be inheritor of AbstractDataProvider class.
+            filename (str): filename with extension for reading data
+            **kwargs : optional arguments for opening file
 
 
         Returns:
@@ -482,8 +499,8 @@ class Data:
                 # split into field name of entry and name of function
                 object_name, method_name = filter_param.split(CALL_METHOD_MARK, 1)
                 # if comparison method
-                if method_name in COMPARISON_OPERATORS:
-                    operation = COMPARISON_OPERATORS[method_name]
+                if method_name in SUPPORTED_FUNCTIONS:
+                    operation = SUPPORTED_FUNCTIONS[method_name]
                     res = [operation(entry[object_name], filter_value)
                            for entry in self._entries]
 
