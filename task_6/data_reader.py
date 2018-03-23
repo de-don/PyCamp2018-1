@@ -26,25 +26,49 @@ class FileExtensionError(Exception):
 
 
 class AbstractDataProvider(abc.ABC):
-    """Class to read data from some source
+    """Abstract class define interface to save or load data
+    from some source
+
+    """
+    @classmethod
+    @abc.abstractclassmethod
+    def load_data(cls, filename, **kwargs):
+        pass
+
+    @classmethod
+    @abc.abstractclassmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        pass
+
+
+class CSVDataProvider(AbstractDataProvider):
+    """Class to save or load data from .csv tables
 
     """
 
+    @classmethod
+    def load_data(cls, filename, **kwargs):
+        """Method to get data from csv file
 
+        Args:
+            filename (str): source filename with extension
+            **kwargs : optional argument for opening csv file
+                *23/03/18 - defined only for csv delimiter symbol
 
-class DataProvider:
-    """Class to read data from different
-
-    """
-
-    def _csv_reader(self, filename, delimiter):
-        """Get data from .csv file
-
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
         """
+        # cvs file delimiter
+        if kwargs.get('delimiter'):
+            delimiter = kwargs.get('delimiter')
+        else:
+            delimiter = ','
 
         with open(filename, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter=delimiter)
-            # print(reader.next())
+
             # get header from first row of csv
             csv_headers = next(reader)
 
@@ -54,6 +78,48 @@ class DataProvider:
                 csv_entries.append(row)
 
         return csv_headers, csv_entries
+
+    @classmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        """Method to save data as csv file
+
+        Args:
+            filename (str): filename with extension
+            headers (list): list of strings with heades names
+            entries (list): list of entries. Each entry is dict()
+                with headers used as keys.
+
+            **kwargs : optional argument for work with csv file
+                *23/03/18 - defined only for csv delimiter symbol
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+        # cvs file delimiter
+        if kwargs.get('delimiter'):
+            delimiter = kwargs.get('delimiter')
+        else:
+            delimiter = ','
+
+        with open(filename, 'w') as csv_file:
+            entry_writer = csv.writer(csv_file, delimiter=delimiter)
+
+            # write headers
+            entry_writer.writerow(headers)
+
+            for entry in entries:
+                # build string of entry values
+                entry_string_values = [
+                    str(entry[header]) for header in headers
+                ]
+                entry_writer.writerow(entry_string_values)
+
+    def _csv_reader(self, filename, delimiter):
+        """Get data from .csv file
+
+        """
 
     @classmethod
     def read_data(self, file_name, file_type, **kwargs):
@@ -89,6 +155,49 @@ class DataProvider:
 
         return _supported_receivers[file_type](file_name)
 
+
+class JSONDataProvider(AbstractDataProvider):
+    """Class to save or load data from .json files of such format:
+        {
+            "name" : ["name_1", "name_2, ..."]
+            "city" : ["city_1", "city_2, ..."]
+            "age" : ["age_1", "age_2, ..."]
+        }
+
+    """
+
+    @classmethod
+    def load_data(cls, filename, **kwargs):
+        """Method to get data from csv file
+
+        Args:
+            filename (str): source filename with extension
+            **kwargs : optional arguments for opening json file
+                *23/03/18 - not defined
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+        # cvs file delimiter
+        if kwargs.get('delimiter'):
+            delimiter = kwargs.get('delimiter')
+        else:
+            delimiter = ','
+
+        with open(filename, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter=delimiter)
+
+            # get header from first row of csv
+            csv_headers = next(reader)
+
+            # get entries from csv
+            csv_entries = list()
+            for row in reader:
+                csv_entries.append(row)
+
+        return csv_headers, csv_entries
 
 
 def header_exist(method_to_decorate):
@@ -256,6 +365,57 @@ class Data:
 
     def print_html_table(self, filename):
         return
+
+    # ##########################################################################
+    # New methods for loading and saving
+    # ##########################################################################
+
+    @classmethod
+    def load_from_file(self, data_provider, filename, **kwargs):
+        """Method to create Data() object using data from some file.
+
+        Args:
+            data_provider: loads data from some source.
+                Must be inheritor of AbstractDataProvider class.
+
+
+        Returns:
+            file_data (Data()): Data object with entries from the source.
+
+        """
+        if not isinstance(data_provider, AbstractDataProvider):
+            raise TypeError('Data provider must be inheritor of '
+                            'AbstractDataProvider class')
+
+        file_headers, file_entries = data_provider.load_data(filename, **kwargs)
+
+        casted_file_entries = list()
+        for entry in file_entries:
+            casted_file_entries.append(self()._get_entry(file_headers, entry))
+
+        file_data = Data(file_headers, casted_file_entries)
+        return file_data
+
+    def save_to_file(self, data_provider, filename, **kwargs):
+        """Method to create some file using data fromData() object .
+
+        Args:
+            data_provider: loads data from some source.
+                Must be inheritor of AbstractDataProvider class.
+            filename (str): filename with extension for saving data
+            **kwargs : optional arguments for opening file
+
+        """
+        if not isinstance(data_provider, AbstractDataProvider):
+            raise TypeError('Data provider must be inheritor of '
+                            'AbstractDataProvider class')
+
+        data_provider.save_data(
+            filename,
+            self._headers,
+            self._entries,
+            **kwargs
+        )
 
     def copy(self):
         return Data(self._headers, self._entries)
