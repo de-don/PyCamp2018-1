@@ -1,5 +1,5 @@
 from unittest import TestCase
-from .data_reader import Data, CSVDataProvider
+from .data_reader import Data, CSVDataProvider, JSONDataProvider
 from datetime import datetime, date
 from pathlib import Path
 
@@ -290,14 +290,31 @@ class DataReaderTest(TestCase):
         d2 = Data().get_json(write)
         self.assertEqual(repr(d), repr(d2))
 
-    def test_data_read_csv_using_dataprovider(self):
+    def test_data_read_csv_using_dataprovider_default_delimiter(self):
+        read = input_folder / 'table2.csv'
+        d = Data().get_csv(read)
+        csv_provider = CSVDataProvider()
+        d2 = Data.load_from_file(csv_provider, read)
+        self.assertEqual(repr(d), repr(d2))
+
+    def test_data_read_csv_using_dataprovider_strange_kwargs(self):
+        read = input_folder / 'table2.csv'
+        d = Data().get_csv(read)
+        csv_provider = CSVDataProvider()
+        d2 = Data.load_from_file(csv_provider, read, kill_them_all=True)
+        self.assertEqual(repr(d), repr(d2))
+
+    def test_data_read_csv_using_dataprovider_delimiter_field(self):
         read = input_folder / 'table2.csv'
         d = Data().get_csv(read)
         csv_provider = CSVDataProvider()
         d2 = Data.load_from_file(csv_provider, read, delimiter=',')
         self.assertEqual(repr(d), repr(d2))
 
-    def test_data_save_to_csv_using_dataprovider(self):
+        with self.assertRaises(TypeError):
+            d2 = Data.load_from_file(d, read, delimiter=',')
+
+    def test_data_save_to_csv_using_dataprovider_with_delimiter(self):
         headers = ['name', 'age', 'city', 'birthday']
         entries = [
             {'name': 'John', 'age': 32, 'city': 'NY',
@@ -316,6 +333,81 @@ class DataReaderTest(TestCase):
         d2 = Data().get_csv(write, delimiter=';')
         self.assertEqual(repr(d), repr(d2))
 
+        with self.assertRaises(TypeError):
+            d2 = Data.save_to_file(d, write, delimiter=',')
+
+    def test_data_save_to_csv_using_dataprovider_no_delimiter(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+        d = Data(headers, entries)
+        csv_provider = CSVDataProvider()
+        write = output_folder / 'dataprovider.csv'
+        d.save_to_file(csv_provider, write)
+        d2 = Data().get_csv(write)
+        self.assertEqual(repr(d), repr(d2))
+
+    def test_data_save_to_csv_using_dataprovider_strange_kwargs(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+        d = Data(headers, entries)
+        csv_provider = CSVDataProvider()
+        write = output_folder / 'dataprovider.csv'
+        d.save_to_file(csv_provider, write, hell='burning')
+        d2 = Data().get_csv(write)
+        self.assertEqual(repr(d), repr(d2))
+
+    def test_data_read_json_using_dataprovider(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+        d = Data(headers, entries)
+        read = input_folder / 'read.json'
+        d2 = Data().load_from_file(JSONDataProvider(), read)
+        self.assertEqual(repr(d), repr(d2))
+
+    def test_data_write_json_using_dataprovider(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+        d = Data(headers, entries)
+        write = output_folder / 'write_prov.json'
+        d.save_to_file(JSONDataProvider(), write)
+        d2 = Data().load_from_file(JSONDataProvider(), write)
+        self.assertEqual(repr(d), repr(d2))
 
 
 

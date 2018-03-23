@@ -116,45 +116,6 @@ class CSVDataProvider(AbstractDataProvider):
                 ]
                 entry_writer.writerow(entry_string_values)
 
-    def _csv_reader(self, filename, delimiter):
-        """Get data from .csv file
-
-        """
-
-    @classmethod
-    def read_data(self, file_name, file_type, **kwargs):
-        """Read data from file of supported type
-
-        """
-
-        _supported_sources = {
-            'csv': self._csv_reader
-        }
-
-        if file_type not in _supported_sources:
-            raise FileExtensionError(
-                f'No support of reading data from .{file_type} files'
-            )
-
-        return _supported_sources[file_type](file_name)
-
-    @classmethod
-    def write_data(self, file_name, file_type, **kwargs):
-        """Read data to file of supported type
-
-        """
-
-        _supported_receivers = {
-
-        }
-
-        if file_type not in _supported_receivers:
-            raise FileExtensionError(
-                f'No support of reading data from .{file_type} files'
-            )
-
-        return _supported_receivers[file_type](file_name)
-
 
 class JSONDataProvider(AbstractDataProvider):
     """Class to save or load data from .json files of such format:
@@ -180,24 +141,41 @@ class JSONDataProvider(AbstractDataProvider):
             csv_entries (list): rows of csv table. Each row is list of values
                 according to csv headers
         """
-        # cvs file delimiter
-        if kwargs.get('delimiter'):
-            delimiter = kwargs.get('delimiter')
-        else:
-            delimiter = ','
+        with open(filename, 'r') as json_out:
+            data = json.load(json_out)
+            # get headers
+            json_headers = list(data.keys())
+            # list of lists for aggregating entry values
+            json_entries_strings = list(zip(*list(data.values())))
 
-        with open(filename, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter=delimiter)
+            return json_headers, json_entries_strings
 
-            # get header from first row of csv
-            csv_headers = next(reader)
+    @classmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        """Method to save data as csv file
 
-            # get entries from csv
-            csv_entries = list()
-            for row in reader:
-                csv_entries.append(row)
+        Args:
+            filename (str): filename with extension
+            headers (list): list of strings with heades names
+            entries (list): list of entries. Each entry is dict()
+                with headers used as keys.
 
-        return csv_headers, csv_entries
+            **kwargs : optional argument for work with csv file
+                *23/03/18 - defined only for csv delimiter symbol
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+        with open(filename, 'w') as json_out:
+            entry_strings = {header: list() for header in headers}
+
+            for entry in entries:
+                for entry_key, entry_value in entry.items():
+                    entry_strings[entry_key].append(str(entry_value))
+
+            json.dump(entry_strings, json_out)
 
 
 def header_exist(method_to_decorate):
