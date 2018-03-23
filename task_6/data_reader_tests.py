@@ -514,6 +514,16 @@ class DataReaderTest(TestCase):
         d4 = d.advanced_filters(birthday__contains_zero=True)
         self.assertEqual(repr(d), repr(d4))
 
+        d5 = d.filtered(age__ge=20)
+        d6 = d.advanced_filters(age__ge=20)
+        self.assertEqual(repr(d5), repr(d6))
+
+        d5 = d.filtered(age__ge=20, name__startswith='J')
+        d6 = d.advanced_filters(age__ge=20, name__startswith='J')
+        self.assertEqual(repr(d5), repr(d6))
+
+
+
 
 
 

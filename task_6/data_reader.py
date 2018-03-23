@@ -728,7 +728,7 @@ class Data:
         filter_results = list()
 
         for entry in filtered_data._entries:
-            # mark that filter will return current entry
+            # mark that filter allow current entry to go further
             entry_is_ok = True
 
             # applying filters to entry one by one
@@ -736,7 +736,7 @@ class Data:
                 # if no calls of method, filter parameter is 'is equal'
                 if CALL_METHOD_MARK not in filter_param:
                     entry_is_ok &= entry[filter_param] == filter_value
-
+                    # filter kicks out object
                     if not entry_is_ok:
                         break
 
@@ -748,23 +748,23 @@ class Data:
                 if method_name in SUPPORTED_FUNCTIONS:
                     operation = SUPPORTED_FUNCTIONS[method_name]
                     entry_is_ok &= operation(entry[object_name], filter_value)
-
+                    # filter kicks out object
                     if not entry_is_ok:
                         break
 
-                # if used custom filter for data type
-                if type(entry[object_name]) in CUSTOM_FILTERS:
-                    operation = CUSTOM_FILTERS[type(entry[object_name])][method_name]
-                    entry_is_ok &= operation(entry[object_name], filter_value)
-
-                    if not entry_is_ok:
-                        break
-
-                if hasattr(entry[object_name], method_name):
+                elif hasattr(entry[object_name], method_name):
                     # use callable method with passed param
                     operation = methodcaller(method_name, filter_value)
 
                     entry_is_ok &= operation(entry[object_name])
+                    # filter kicks out object
+                    if not entry_is_ok:
+                        break
+
+                # if used custom filter for data type
+                elif type(entry[object_name]) in CUSTOM_FILTERS:
+                    operation = CUSTOM_FILTERS[type(entry[object_name])][method_name]
+                    entry_is_ok &= operation(entry[object_name], filter_value)
 
             # save result of applying filter
             filter_results.append(entry_is_ok)
