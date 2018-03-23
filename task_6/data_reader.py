@@ -178,6 +178,83 @@ class JSONDataProvider(AbstractDataProvider):
             json.dump(entry_strings, json_out)
 
 
+class HTMLDataProvider(AbstractDataProvider):
+    """Class to load data to .html tables
+
+    """
+    _table_template = '<table>\n{}\n</table>'
+    _row_template = '\t<tr>\n{}\n</tr>'
+    # _header_template = '<th>{}</th>'
+    # _cell_template = '<td>{}</td>'
+
+    def _build_row(self, cells, header=False):
+        """Build a row of html table using list of cell values
+
+        Args:
+            cells (list): list of values to build row of table
+            header (bool): defines if use header tag <th>
+                or data element tag <td>
+
+        Returns:
+            html_table_row (str): representation of html table's row
+        """
+        if header:
+            html_cells = [
+                f'\t\t<th>{str(cell)}</th>' for cell in cells
+            ]
+        else:
+            html_cells = [
+                f'\t\t<td>{str(cell)}</td>' for cell in cells
+            ]
+
+        html_table_row = self._row_template.format('\n'.join(html_cells))
+        return html_table_row
+
+    @classmethod
+    def load_data(cls, filename, **kwargs):
+        """Method to get data from html file
+        *23/03/18 - NOT SUPPORTED
+        """
+        raise FileExtensionError('Reading from .html file is not supported')
+
+    @classmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        """Method to save data as csv file
+
+        Args:
+            filename (str): filename with extension
+            headers (list): list of strings with heades names
+            entries (list): list of entries. Each entry is dict()
+                with headers used as keys.
+
+            **kwargs : optional argument for work with csv file
+                *23/03/18 - not defined
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+
+        with open(filename, 'w') as html_file:
+            html_rows = list()
+
+            # make a row of  headers
+            html_rows.append(cls()._build_row(headers, header=True))
+
+            for entry in entries:
+                # select values from entry dict
+                entry_string_values = [
+                    str(entry[header]) for header in headers
+                ]
+                html_rows.append(cls()._build_row(entry_string_values))
+            html_file.write(
+                cls._table_template.format(
+                    '\n'.join(html_rows)
+                )
+            )
+
+
 def header_exist(method_to_decorate):
     """Check that header exists in data
 
@@ -355,9 +432,6 @@ class Data:
                     entry_strings[entry_key].append(str(entry_value))
 
             json.dump(entry_strings, json_out)
-
-    def print_html_table(self, filename):
-        return
 
     # ##########################################################################
     # New methods for loading and saving

@@ -1,7 +1,11 @@
 from unittest import TestCase
-from .data_reader import Data, CSVDataProvider, JSONDataProvider, add_filter
 from datetime import datetime, date
 from pathlib import Path
+from filecmp import cmp
+from .data_reader import Data, \
+    add_filter, \
+    FileExtensionError, \
+    CSVDataProvider, JSONDataProvider, HTMLDataProvider
 
 
 input_folder = Path("./task_6/input/")
@@ -441,6 +445,29 @@ class DataReaderTest(TestCase):
         d3 = d.filtered(age__contains_zero=True)
         self.assertEqual(repr(d2), repr(d3))
 
+    def test_data_write_html_table_using_dataprovider(self):
+        headers = ['name', 'age', 'city', 'birthday']
+        entries = [
+            {'name': 'John', 'age': 32, 'city': 'NY',
+             'birthday': date(1986, 10, 10)},
+            {'name': 'Sam', 'age': 18, 'city': 'LA',
+             'birthday': date(2000, 1, 11)},
+            {'name': 'Igor', 'age': 47, 'city': 'Krasnoyarsk',
+             'birthday': date(1971, 10, 20)},
+            {'name': 'John', 'age': 18, 'city': 'Los Angeles',
+             'birthday': date(1999, 10, 11)}
+        ]
+        d = Data(headers, entries)
+        write = output_folder / 'write.html'
+        read = input_folder / 'read.html'
+        d.save_to_file(HTMLDataProvider(), write)
+        self.assertTrue(cmp(write, read))
+
+    def test_data_read_html_table_using_dataprovider(self):
+        """NOT SUPPORTED"""
+        read = input_folder / 'read.html'
+        with self.assertRaises(FileExtensionError):
+            Data().load_from_file(HTMLDataProvider(), read)
 
 
 
