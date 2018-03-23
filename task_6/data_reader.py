@@ -1,9 +1,10 @@
 import csv
 import abc
 import json
+import yaml
 from dateutil import parser
 from datetime import datetime
-from itertools import compress
+from itertools import compress, chain
 from operator import itemgetter, methodcaller, lt, le, eq, ne, ge, gt
 
 
@@ -30,6 +31,47 @@ class AbstractDataProvider(abc.ABC):
     from some source
 
     """
+    # functions used for conversion from string into some type
+    _conversion_funcs = [int, float, parser.parse]
+
+    def _represents_type(self, some_type, value):
+        """Check if value can be casted into some type"""
+        try:
+            some_type(value)
+            return True
+        except ValueError:
+            return False
+
+    def _get_entries(self, headers, entry_values):
+        """Convert string of entry values into entry, represented as dict.
+
+        Can convert string into supported types
+
+        """
+        casted_file_entries = list()
+
+        for entry_value in entry_values:
+            # convert types of values
+            casted_entry_vals = list()
+            for val in entry_value:
+                # try each of probable types to cast
+                for cast_type in self._conversion_funcs:
+                    if self._represents_type(cast_type, val):
+                        after_cast = cast_type(val)
+                        if isinstance(after_cast, datetime):
+                            after_cast = after_cast.date()
+                        casted_entry_vals.append(after_cast)
+                        break
+                # or do not cast and save as sting
+                else:
+                    casted_entry_vals.append(val)
+
+            entry = dict(zip(headers, casted_entry_vals))
+            # self._entries.append(entry)
+            casted_file_entries.append(entry)
+
+        return casted_file_entries
+
     @classmethod
     @abc.abstractclassmethod
     def load_data(cls, filename, **kwargs):
@@ -77,7 +119,7 @@ class CSVDataProvider(AbstractDataProvider):
             for row in reader:
                 csv_entries.append(row)
 
-        return csv_headers, csv_entries
+        return csv_headers, cls()._get_entries(csv_headers, csv_entries)
 
     @classmethod
     def save_data(cls, filename, headers, entries, **kwargs):
@@ -148,7 +190,8 @@ class JSONDataProvider(AbstractDataProvider):
             # list of lists for aggregating entry values
             json_entries_strings = list(zip(*list(data.values())))
 
-            return json_headers, json_entries_strings
+            return json_headers, cls()._get_entries(json_headers,
+                                                    json_entries_strings)
 
     @classmethod
     def save_data(cls, filename, headers, entries, **kwargs):
@@ -255,6 +298,63 @@ class HTMLDataProvider(AbstractDataProvider):
             )
 
 
+class YAMLDataProvider(AbstractDataProvider):
+    """Class to save or load data from .yaml tables
+
+    """
+
+    @classmethod
+    def load_data(cls, filename, **kwargs):
+        """Method to get data from csv file
+
+        Args:
+            filename (str): source filename with extension
+            **kwargs : optional argument for opening csv file
+                *23/03/18 - defined only for csv delimiter symbol
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+
+        with open(filename, 'r') as yml_file:
+            yml_entries = yaml.load(yml_file)
+
+            # get headers from all entries
+            all_keys = set(chain.from_iterable(yml_entries))
+
+            # check each entry has same headers as others
+            if not all(all_keys == entry.keys() for entry in yml_entries):
+                raise KeyError('Entries with different fields were passed')
+
+        return all_keys, yml_entries
+
+    @classmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        """Method to save data as csv file
+
+        Args:
+            filename (str): filename with extension
+            headers (list): list of strings with heades names
+            entries (list): list of entries. Each entry is dict()
+                with headers used as keys.
+
+            **kwargs : optional argument for work with csv file
+                *23/03/18 - defined only for csv delimiter symbol
+
+        Returns:
+            csv_headers (list): headers of csv table
+            csv_entries (list): rows of csv table. Each row is list of values
+                according to csv headers
+        """
+        with open(filename, 'w') as outfile:
+            yaml.dump(entries, outfile, default_flow_style=False)
+
+
+
+
+
 def header_exist(method_to_decorate):
     """Check that header exists in data
 
@@ -283,7 +383,6 @@ class Data:
     """ Class to store and manipulate data from table-like sources
 
     """
-
     # functions used for conversion from string into some type
     _conversion_funcs = [int, float, parser.parse]
 
@@ -332,6 +431,7 @@ class Data:
         entry = dict(zip(headers, casted_entry_vals))
         # self._entries.append(entry)
         return entry
+
 
     @property
     def headers(self):
@@ -458,11 +558,7 @@ class Data:
 
         file_headers, file_entries = data_provider.load_data(filename, **kwargs)
 
-        casted_file_entries = list()
-        for entry in file_entries:
-            casted_file_entries.append(self()._get_entry(file_headers, entry))
-
-        file_data = Data(file_headers, casted_file_entries)
+        file_data = Data(file_headers, file_entries)
         return file_data
 
     def save_to_file(self, data_provider, filename, **kwargs):

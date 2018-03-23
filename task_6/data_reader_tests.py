@@ -2,10 +2,9 @@ from unittest import TestCase
 from datetime import datetime, date
 from pathlib import Path
 from filecmp import cmp
-from .data_reader import Data, \
-    add_filter, \
-    FileExtensionError, \
-    CSVDataProvider, JSONDataProvider, HTMLDataProvider
+from .data_reader import Data, add_filter, FileExtensionError, \
+    CSVDataProvider, JSONDataProvider, YAMLDataProvider, \
+    HTMLDataProvider
 
 
 input_folder = Path("./task_6/input/")
@@ -468,6 +467,16 @@ class DataReaderTest(TestCase):
         read = input_folder / 'read.html'
         with self.assertRaises(FileExtensionError):
             Data().load_from_file(HTMLDataProvider(), read)
+
+    def test_data_yamlfile_using_dataprovider(self):
+        read = input_folder / 'input.yaml'
+        d = Data().load_from_file(YAMLDataProvider(), read)
+        write = output_folder / 'output.yaml'
+        d.save_to_file(YAMLDataProvider(), write)
+        self.assertTrue(cmp(write, read))
+
+        d2 = Data().load_from_file(YAMLDataProvider(), write)
+        self.assertEqual(repr(d), repr(d2))
 
 
 
