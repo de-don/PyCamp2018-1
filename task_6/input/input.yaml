@@ -1,0 +1,16 @@
+- age: 32
+  birthday: 1986-10-10
+  city: NY
+  name: John
+- age: 18
+  birthday: 2000-01-11
+  city: LA
+  name: Sam
+- age: 47
+  birthday: 1971-10-20
+  city: Krasnoyarsk
+  name: Igor
+- age: 18
+  birthday: 1999-10-11
+  city: Los Angeles
+  name: John
