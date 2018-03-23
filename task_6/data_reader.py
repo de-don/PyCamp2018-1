@@ -19,6 +19,16 @@ SUPPORTED_FUNCTIONS = {
 }
 
 
+CUSTOM_FILTERS = {
+    str: {
+
+    },
+    int: {
+
+    }
+}
+
+
 CALL_METHOD_MARK = '__'
 
 
@@ -352,9 +362,6 @@ class YAMLDataProvider(AbstractDataProvider):
             yaml.dump(entries, outfile, default_flow_style=False)
 
 
-
-
-
 def header_exist(method_to_decorate):
     """Check that header exists in data
 
@@ -377,6 +384,32 @@ def add_filter(filter_to_decorate):
         return filter_to_decorate(value, condition)
 
     return wrapper
+
+
+def add_custom_filter(**kwargs):
+    """Adds custom filter to SUPPORTED_FUNCTIONS dict
+
+    """
+
+    def filter_decorator(filter_to_decorate):
+        if not kwargs.get('types'):
+            raise TypeError('Types of custom filtering must be defined')
+
+        # add filter_to_decorate to supported functions
+        for data_type in kwargs['types']:
+            CUSTOM_FILTERS[data_type].update(
+                {
+                    filter_to_decorate.__name__:
+                    filter_to_decorate
+                }
+            )
+
+        def wrapper(value, condition):
+            return filter_to_decorate(value, condition)
+
+        return wrapper
+
+    return filter_decorator
 
 
 class Data:
@@ -431,7 +464,6 @@ class Data:
         entry = dict(zip(headers, casted_entry_vals))
         # self._entries.append(entry)
         return entry
-
 
     @property
     def headers(self):
@@ -660,7 +692,7 @@ class Data:
         filter_results = [True for _ in self._entries]
 
         for filter_param, filter_value in filter_params.items():
-            # if no calls of method, filter parameter is 'greater than'
+            # if no calls of method, filter parameter is 'is equal'
             if CALL_METHOD_MARK not in filter_param:
 
                 res = [entry[filter_param] == filter_value for entry in
@@ -686,4 +718,59 @@ class Data:
         filtered_data._entries = list(compress(self._entries, filter_results))
 
         return filtered_data
+
+    def advanced_filters(self, **filter_params):
+        """Return Data object with filtered entries
+
+        """
+        filtered_data = self.copy()
+
+        filter_results = list()
+
+        for entry in filtered_data._entries:
+            # mark that filter will return current entry
+            entry_is_ok = True
+
+            # applying filters to entry one by one
+            for filter_param, filter_value in filter_params.items():
+                # if no calls of method, filter parameter is 'is equal'
+                if CALL_METHOD_MARK not in filter_param:
+                    entry_is_ok &= entry[filter_param] == filter_value
+
+                    if not entry_is_ok:
+                        break
+
+                # split into field name of entry and name of function
+                object_name, method_name = filter_param.split(
+                    CALL_METHOD_MARK, 1)
+
+                # if comparison method
+                if method_name in SUPPORTED_FUNCTIONS:
+                    operation = SUPPORTED_FUNCTIONS[method_name]
+                    entry_is_ok &= operation(entry[object_name], filter_value)
+
+                    if not entry_is_ok:
+                        break
+
+                # if used custom filter for data type
+                if type(entry[object_name]) in CUSTOM_FILTERS:
+                    operation = CUSTOM_FILTERS[type(entry[object_name])][method_name]
+                    entry_is_ok &= operation(entry[object_name], filter_value)
+
+                    if not entry_is_ok:
+                        break
+
+                if hasattr(entry[object_name], method_name):
+                    # use callable method with passed param
+                    operation = methodcaller(method_name, filter_value)
+
+                    entry_is_ok &= operation(entry[object_name])
+
+            # save result of applying filter
+            filter_results.append(entry_is_ok)
+
+        filtered_data._entries = list(compress(self._entries, filter_results))
+
+        return filtered_data
+
 
