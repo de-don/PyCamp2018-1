@@ -114,10 +114,7 @@ class CSVDataProvider(AbstractDataProvider):
                 according to csv headers
         """
         # cvs file delimiter
-        if kwargs.get('delimiter'):
-            delimiter = kwargs.get('delimiter')
-        else:
-            delimiter = ','
+        delimiter = kwargs.get('delimiter', ',')
 
         with open(filename, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter=delimiter)
@@ -126,9 +123,7 @@ class CSVDataProvider(AbstractDataProvider):
             csv_headers = next(reader)
 
             # get entries from csv
-            csv_entries = list()
-            for row in reader:
-                csv_entries.append(row)
+            csv_entries = list(reader)
 
         return csv_headers, cls()._get_entries(csv_headers, csv_entries)
 
@@ -151,10 +146,7 @@ class CSVDataProvider(AbstractDataProvider):
                 according to csv headers
         """
         # cvs file delimiter
-        if kwargs.get('delimiter'):
-            delimiter = kwargs.get('delimiter')
-        else:
-            delimiter = ','
+        delimiter = kwargs.get('delimiter', ',')
 
         with open(filename, 'w') as csv_file:
             entry_writer = csv.writer(csv_file, delimiter=delimiter)
@@ -197,7 +189,7 @@ class JSONDataProvider(AbstractDataProvider):
         with open(filename, 'r') as json_out:
             data = json.load(json_out)
             # get headers
-            json_headers = list(data.keys())
+            json_headers = data.keys()  # already list
             # list of lists for aggregating entry values
             json_entries_strings = list(zip(*list(data.values())))
 
@@ -253,13 +245,13 @@ class HTMLDataProvider(AbstractDataProvider):
             html_table_row (str): representation of html table's row
         """
         if header:
-            html_cells = [
+            html_cells = (
                 f'\t\t<th>{str(cell)}</th>' for cell in cells
-            ]
+            )
         else:
-            html_cells = [
+            html_cells = (
                 f'\t\t<td>{str(cell)}</td>' for cell in cells
-            ]
+            )
 
         html_table_row = self._row_template.format('\n'.join(html_cells))
         return html_table_row
