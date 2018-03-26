@@ -2,6 +2,7 @@ import csv
 import abc
 import json
 import yaml
+import sqlite3
 from dateutil import parser
 from datetime import datetime
 from itertools import compress, chain
@@ -315,17 +316,17 @@ class YAMLDataProvider(AbstractDataProvider):
 
     @classmethod
     def load_data(cls, filename, **kwargs):
-        """Method to get data from csv file
+        """Method to get data from .yml file
 
         Args:
             filename (str): source filename with extension
             **kwargs : optional argument for opening csv file
-                *23/03/18 - defined only for csv delimiter symbol
+                *23/03/18 - not defined
 
         Returns:
-            csv_headers (list): headers of csv table
-            csv_entries (list): rows of csv table. Each row is list of values
-                according to csv headers
+            yml_headers (list): fields of notes in yml file
+            yml_entries (list): values of fields in a note of yml file.
+                Each is list of values according to yml headers
         """
 
         with open(filename, 'r') as yml_file:
@@ -333,20 +334,21 @@ class YAMLDataProvider(AbstractDataProvider):
 
             # get headers from all entries
             all_keys = set(chain.from_iterable(yml_entries))
+            yml_headers = all_keys
 
             # check each entry has same headers as others
             if not all(all_keys == entry.keys() for entry in yml_entries):
                 raise KeyError('Entries with different fields were passed')
 
-        return all_keys, yml_entries
+        return yml_headers, yml_entries
 
     @classmethod
     def save_data(cls, filename, headers, entries, **kwargs):
-        """Method to save data as csv file
+        """Method to save data as yml file
 
         Args:
             filename (str): filename with extension
-            headers (list): list of strings with heades names
+            headers (list): list of strings with headers names
             entries (list): list of entries. Each entry is dict()
                 with headers used as keys.
 
@@ -354,12 +356,63 @@ class YAMLDataProvider(AbstractDataProvider):
                 *23/03/18 - defined only for csv delimiter symbol
 
         Returns:
-            csv_headers (list): headers of csv table
-            csv_entries (list): rows of csv table. Each row is list of values
-                according to csv headers
+            yml_headers (list): fields of notes in yml file
+            yml_entries (list): values of fields in a note of yml file.
+                Each is list of values according to yml headers
         """
         with open(filename, 'w') as outfile:
             yaml.dump(entries, outfile, default_flow_style=False)
+
+
+class SQLiteDataProvider(AbstractDataProvider):
+    """Class to read data from .sqlite3 databases
+
+    """
+
+    @classmethod
+    def load_data(cls, filename, **kwargs):
+        """Method to get data from .yml file
+
+        Args:
+            filename (str): source filename with extension
+            **kwargs : optional argument for opening csv file
+                *23/03/18 - not defined
+
+        Raises:
+
+        """
+        table_name = kwargs.get('table_name')
+
+        # Connecting to the database file
+        conn = sqlite3.connect(filename)
+        c = conn.cursor()
+
+        # Retrieve column information
+        # Every column is a tuple with the following attributes:
+        # (id, name, type, notnull, default_value, primary_key)
+        c.execute('PRAGMA TABLE_INFO({})'.format(table_name))
+
+        # collect names in a list
+        db_headers = [tup[1] for tup in c.fetchall()]
+
+        # Contents of all columns for a row
+        c.execute('SELECT * FROM {tn}'.format(tn=table_name))
+        all_rows = c.fetchall()
+
+        db_entries = cls()._get_entries(db_headers, all_rows)
+
+        # Committing changes and closing the connection to the database file
+        conn.commit()
+        conn.close()
+
+        return db_headers, db_entries
+
+    @classmethod
+    def save_data(cls, filename, headers, entries, **kwargs):
+        """Method to save data as yml file
+        *26/03/18 - NOT SUPPORTED
+        """
+        raise FileExtensionError('Saving to sqlite3 DB is not supported')
 
 
 def header_exist(method_to_decorate):

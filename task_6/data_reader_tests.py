@@ -5,7 +5,7 @@ from filecmp import cmp
 from .data_reader import Data, add_filter, add_custom_filter, \
     FileExtensionError, \
     CSVDataProvider, JSONDataProvider, YAMLDataProvider, \
-    HTMLDataProvider
+    HTMLDataProvider, SQLiteDataProvider
 
 
 input_folder = Path("./task_6/input/")
@@ -521,6 +521,38 @@ class DataReaderTest(TestCase):
         d5 = d.filtered(age__ge=20, name__startswith='J')
         d6 = d.advanced_filters(age__ge=20, name__startswith='J')
         self.assertEqual(repr(d5), repr(d6))
+
+    def test_data_sqlite_reading(self):
+        read = str(input_folder / 'input.db')
+        d = Data().load_from_file(
+            SQLiteDataProvider(),
+            read,
+            table_name='test_table',
+        )
+
+        headers = ['name', 'birthday', 'age', 'city']
+        entries = [
+            {'name': 'Igor',
+             'birthday': date(1971, 10, 20), 'age': 47, 'city': 'Krasnoyarsk'},
+            {'name': 'Sam',
+             'birthday': date(2000, 1, 11), 'age': 18, 'city': 'LA'},
+            {'name': 'John',
+             'birthday': date(1986, 10, 10), 'age': 32, 'city': 'NY'},
+            {'name': 'John',
+             'birthday': date(1999, 10, 11), 'age': 18, 'city': 'Los Angeles'},
+        ]
+        d2 = Data(headers, entries)
+        self.assertEqual(repr(d), repr(d2))
+
+        with self.assertRaises(FileExtensionError):
+            write = str(input_folder / 'output.db')
+
+            d2.save_to_file(
+                SQLiteDataProvider(),
+                write,
+                table_name='test_table',
+            )
+
 
 
 
